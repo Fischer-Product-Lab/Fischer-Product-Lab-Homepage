@@ -133,10 +133,10 @@ const releases: Release[] = [
   { id: "CHG0039581", day: 23, month: 16, title: "Settlement performance release", time: "10:30 PM", window: "10:30 PM–12:30 AM CT", service: "Clearing & Settlement", owner: "J. Wu", risk: "Moderate", type: "Normal", status: "Scheduled", environment: "Production", summary: "Deploy batch throughput and contention improvements.", conditions: ["Performance baseline approved", "Peak simulation passed", "DBA coverage confirmed"] },
   { id: "CHG0039643", day: 5, month: 17, title: "API platform version upgrade", time: "9:00 PM", window: "9:00 PM–12:00 AM CT", service: "Integration Gateway", owner: "S. Brooks", risk: "High", type: "Normal", status: "Pending approval", environment: "Production", summary: "Upgrade the shared API platform runtime with phased consumer validation.", conditions: ["Consumer matrix signed", "Canary thresholds defined", "Rollback image retained"] },
   { id: "CHG0039702", day: 19, month: 17, title: "Fiscal-year reporting release", time: "8:30 PM", window: "8:30 PM–11:00 PM CT", service: "Data & Reporting", owner: "L. Martin", risk: "Moderate", type: "Normal", status: "Scheduled", environment: "Production", summary: "Release fiscal-year reporting updates and executive portfolio extracts.", conditions: ["Finance validation complete", "Extract totals reconciled", "Business sign-off assigned"] },
-];
+].map((release) => release.month > 6 ? { ...release, month: release.month - 12, status: "Complete" as const } : release);
 
 const monthMeta = Array.from({ length: 12 }, (_, index) => {
-  const key = 6 + index;
+  const key = -5 + index;
   const date = new Date(2026, key, 1);
   return {
     key,
@@ -536,11 +536,11 @@ function ReleaseCalendar({ requestedId }: { requestedId?: string }) {
   return (
     <section className="calendar-view">
       <div className="detail-header calendar-header">
-        <div><span className="eyebrow">Change & release management</span><h1>Release calendar</h1><p>Rolling 12-month view of production deployments, readiness, risk, and validation conditions.</p></div>
+        <div><span className="eyebrow">Change & release management</span><h1>Release calendar</h1><p>Trailing 12-month view of production deployments, readiness, risk, and validation conditions.</p></div>
         <div className="calendar-stats"><div><span>This month</span><strong>{monthReleases.length}</strong></div><div><span>High risk</span><strong>{monthReleases.filter((item) => item.risk === "High").length}</strong></div><div><span>Awaiting approval</span><strong>{monthReleases.filter((item) => item.status === "Pending approval").length}</strong></div></div>
       </div>
       <div className="calendar-toolbar">
-        <div className="month-control"><button disabled={month === 6} onClick={() => setMonth(month - 1)} aria-label="Previous month">←</button><strong>{monthData.label}</strong><button disabled={month === 17} onClick={() => setMonth(month + 1)} aria-label="Next month">→</button></div>
+        <div className="month-control"><button disabled={month === -5} onClick={() => setMonth(month - 1)} aria-label="Previous month">←</button><strong>{monthData.label}</strong><button disabled={month === 6} onClick={() => setMonth(month + 1)} aria-label="Next month">→</button></div>
         <div className="month-tabs">{monthMeta.map((item) => <button className={month === item.key ? "active" : ""} key={item.key} onClick={() => setMonth(item.key)}><span>{item.short}</span><small>{String(item.year).slice(-2)}</small></button>)}</div>
         <div className="calendar-legend"><span><i className="risk-low" /> Low</span><span><i className="risk-moderate" /> Moderate</span><span><i className="risk-high" /> High risk</span></div>
       </div>
