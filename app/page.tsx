@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type View = "overview" | "incidents" | "problems" | "changes" | "releases";
-type FilterState = { status?: string; outcome?: string; priority?: string };
+type FilterState = { status?: string; outcome?: string; priority?: string; service?: string };
 
 type Ticket = {
   id: string;
@@ -43,12 +43,12 @@ const navItems: { id: View; label: string; short: string }[] = [
   { id: "releases", label: "Release calendar", short: "Releases" },
 ];
 
-const trendMonths = ["Feb", "Mar", "Apr", "May", "Jun", "Jul"];
+const trendMonths = ["Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"];
 
 const trends = {
-  incidents: { opened: [201, 193, 218, 207, 229, 214], closed: [190, 205, 210, 221, 224, 186] },
-  problems: { opened: [15, 13, 18, 17, 14, 16], closed: [11, 14, 12, 15, 15, 11] },
-  changes: { opened: [72, 79, 83, 91, 88, 96], closed: [69, 76, 81, 86, 84, 80] },
+  incidents: { opened: [238, 226, 241, 219, 232, 224, 201, 193, 218, 207, 229, 214], closed: [221, 230, 235, 227, 228, 231, 190, 205, 210, 221, 224, 186] },
+  problems: { opened: [12, 14, 13, 11, 16, 14, 15, 13, 18, 17, 14, 16], closed: [10, 11, 15, 12, 13, 16, 11, 14, 12, 15, 15, 11] },
+  changes: { opened: [68, 74, 77, 81, 75, 79, 72, 79, 83, 91, 88, 96], closed: [65, 72, 79, 78, 77, 82, 69, 76, 81, 86, 84, 80] },
 };
 
 const incidents: Ticket[] = [
@@ -61,6 +61,11 @@ const incidents: Ticket[] = [
   { id: "INC0091544", title: "Reporting extract returned partial results", status: "Resolved", priority: "P3", service: "Data & Reporting", owner: "Data Operations", opened: "Jul 7, 11:22 AM", age: "2d" },
   { id: "INC0091490", title: "Entitlement sync queue backlog", status: "Closed", priority: "P3", service: "Client Identity", owner: "IAM Operations", opened: "Jul 6, 3:36 PM", age: "2d 20h" },
   { id: "INC0091422", title: "Notification delivery delay", status: "Closed", priority: "P4", service: "Communications", owner: "Messaging Services", opened: "Jul 5, 7:14 PM", age: "3d 16h" },
+  { id: "INC0091386", title: "Cash-management export unavailable", status: "In Progress", priority: "P2", service: "Cash Management", owner: "Treasury Platforms", opened: "Jul 5, 10:08 AM", age: "4d 1h", risk: "SLA at risk" },
+  { id: "INC0091344", title: "Client statement generation delay", status: "Resolved", priority: "P3", service: "Statements & Tax", owner: "Document Services", opened: "Jul 4, 6:31 PM", age: "4d 17h" },
+  { id: "INC0091279", title: "Mobile push registration failures", status: "Closed", priority: "P3", service: "Mobile Experience", owner: "Digital Channels", opened: "Jul 3, 1:42 PM", age: "5d 22h" },
+  { id: "INC0091198", title: "Reference-data reconciliation mismatch", status: "Closed", priority: "P3", service: "Data & Reporting", owner: "Data Operations", opened: "Jul 2, 8:15 AM", age: "7d 3h" },
+  { id: "INC0091107", title: "Automated account-opening task stalled", status: "Closed", priority: "P4", service: "Account Opening", owner: "Workflow Operations", opened: "Jun 30, 3:20 PM", age: "8d 20h" },
 ];
 
 const problems: Ticket[] = [
@@ -72,6 +77,11 @@ const problems: Ticket[] = [
   { id: "PRB0012395", title: "Certificate renewal notification gap", status: "Closed", priority: "P3", service: "DevOps Platform", owner: "Platform Engineering", opened: "May 16", age: "54d" },
   { id: "PRB0012368", title: "Reporting partition skew", status: "Monitoring", priority: "P3", service: "Data & Reporting", owner: "Data Operations", opened: "Apr 28", age: "72d" },
   { id: "PRB0012311", title: "Entitlement queue poison message", status: "Closed", priority: "P3", service: "Client Identity", owner: "IAM Operations", opened: "Apr 4", age: "96d" },
+  { id: "PRB0012294", title: "Cash export memory pressure", status: "RCA In Progress", priority: "P2", service: "Cash Management", owner: "Treasury Platforms", opened: "Mar 27", age: "104d", risk: "RCA overdue" },
+  { id: "PRB0012262", title: "Statement rendering dependency timeout", status: "Known Error", priority: "P3", service: "Statements & Tax", owner: "Document Services", opened: "Mar 12", age: "119d" },
+  { id: "PRB0012238", title: "Mobile registration token collision", status: "Fix In Progress", priority: "P3", service: "Mobile Experience", owner: "Digital Channels", opened: "Feb 21", age: "138d" },
+  { id: "PRB0012181", title: "Account-opening workflow lock contention", status: "Monitoring", priority: "P3", service: "Account Opening", owner: "Workflow Operations", opened: "Jan 19", age: "171d" },
+  { id: "PRB0012144", title: "Vendor reference file occasionally incomplete", status: "Closed", priority: "P4", service: "Data & Reporting", owner: "Data Operations", opened: "Dec 11", age: "210d" },
 ];
 
 const changes: Ticket[] = [
@@ -84,6 +94,11 @@ const changes: Ticket[] = [
   { id: "CHG0038210", title: "Reporting cluster version update", status: "Closed", priority: "P2", service: "Data & Reporting", owner: "L. Martin", opened: "Jun 23", age: "16d", outcome: "Failed", risk: "High" },
   { id: "CHG0038184", title: "Entitlement service database migration", status: "Rescheduled", priority: "P2", service: "Client Identity", owner: "D. Kim", opened: "Jun 21", age: "18d", outcome: "Carried over", risk: "High" },
   { id: "CHG0038141", title: "Notification provider failover test", status: "Closed", priority: "P3", service: "Communications", owner: "P. Young", opened: "Jun 18", age: "21d", outcome: "Closed with issues", risk: "Moderate" },
+  { id: "CHG0038106", title: "Cash export worker scaling", status: "Closed", priority: "P3", service: "Cash Management", owner: "E. Ford", opened: "Jun 16", age: "23d", outcome: "Successful", risk: "Low" },
+  { id: "CHG0038073", title: "Statement renderer dependency update", status: "Closed", priority: "P3", service: "Statements & Tax", owner: "N. Hall", opened: "Jun 13", age: "26d", outcome: "Closed with issues", risk: "Moderate" },
+  { id: "CHG0038027", title: "Mobile notification SDK rollout", status: "Closed", priority: "P3", service: "Mobile Experience", owner: "C. Evans", opened: "Jun 9", age: "30d", outcome: "Successful", risk: "Low" },
+  { id: "CHG0037988", title: "Reference data ingestion redesign", status: "Closed", priority: "P2", service: "Data & Reporting", owner: "L. Martin", opened: "Jun 5", age: "34d", outcome: "Successful", risk: "Moderate" },
+  { id: "CHG0037932", title: "Account-opening orchestration patch", status: "Closed", priority: "P2", service: "Account Opening", owner: "B. Lewis", opened: "May 30", age: "40d", outcome: "Failed", risk: "High" },
 ];
 
 const releases: Release[] = [
@@ -101,13 +116,37 @@ const releases: Release[] = [
   { id: "CHG0038660", day: 25, month: 7, title: "Observability agent rollout", time: "8:00 PM", window: "8:00 PM–10:00 PM CT", service: "DevOps Platform", owner: "R. Chen", risk: "Low", type: "Standard", status: "Ready", environment: "Production", summary: "Deploy the standard observability agent across remaining production services.", conditions: ["Coverage report attached", "CPU overhead below 2%", "Dashboards pre-created"] },
   { id: "CHG0038704", day: 8, month: 8, title: "Emergency access hardening", time: "9:00 PM", window: "9:00 PM–10:00 PM CT", service: "Client Identity", owner: "A. Shah", risk: "Moderate", type: "Emergency", status: "Scheduled", environment: "Production", summary: "Harden break-glass access controls following quarterly review.", conditions: ["Security approval complete", "Access test scheduled", "Audit evidence retained"] },
   { id: "CHG0038756", day: 15, month: 8, title: "Trading release 26.9", time: "8:30 PM", window: "8:30 PM–11:30 PM CT", service: "Trading Platform", owner: "M. Rivera", risk: "High", type: "Normal", status: "Scheduled", environment: "Production", summary: "Deliver the September trading platform release train.", conditions: ["Regression suite green", "Business sign-off complete", "Rollback checkpoint at +45m"] },
+  { id: "CHG0038812", day: 6, month: 9, title: "API gateway TLS refresh", time: "9:00 PM", window: "9:00 PM–10:30 PM CT", service: "Integration Gateway", owner: "S. Brooks", risk: "Low", type: "Standard", status: "Ready", environment: "Production", summary: "Rotate gateway certificates and validate downstream client trust chains.", conditions: ["Certificate chain validated", "Consumer notice complete", "Rollback bundle staged"] },
+  { id: "CHG0038864", day: 20, month: 9, title: "Change-freeze readiness release", time: "8:00 PM", window: "8:00 PM–11:00 PM CT", service: "DevOps Platform", owner: "R. Chen", risk: "Moderate", type: "Normal", status: "Scheduled", environment: "Production", summary: "Complete platform tooling updates ahead of the year-end change freeze.", conditions: ["Freeze exception list reviewed", "Toolchain health green", "Support coverage confirmed"] },
+  { id: "CHG0038919", day: 3, month: 10, title: "Tax processing capacity uplift", time: "10:00 PM", window: "10:00 PM–12:30 AM CT", service: "Statements & Tax", owner: "N. Hall", risk: "Moderate", type: "Normal", status: "Scheduled", environment: "Production", summary: "Add document-rendering capacity before year-end tax statement generation.", conditions: ["Load test target met", "Queue alarms validated", "Capacity rollback documented"] },
+  { id: "CHG0038961", day: 17, month: 10, title: "Identity secondary-region activation", time: "9:30 PM", window: "9:30 PM–12:30 AM CT", service: "Client Identity", owner: "D. Kim", risk: "High", type: "Normal", status: "Pending approval", environment: "Production", summary: "Activate secondary-region identity services and validate controlled traffic failover.", conditions: ["Multi-region review approved", "Failback test complete", "Executive bridge staffed"] },
+  { id: "CHG0039014", day: 9, month: 11, title: "Holiday freeze security exception", time: "11:00 PM", window: "11:00 PM–12:00 AM CT", service: "Client Identity", owner: "A. Shah", risk: "High", type: "Emergency", status: "Scheduled", environment: "Production", summary: "Deploy a narrowly scoped security fix during the year-end change freeze.", conditions: ["Emergency CAB approval", "Security validation attached", "Customer notification on standby"] },
+  { id: "CHG0039077", day: 13, month: 12, title: "Annual certificate rotation", time: "8:00 PM", window: "8:00 PM–10:00 PM CT", service: "DevOps Platform", owner: "R. Chen", risk: "Low", type: "Standard", status: "Ready", environment: "Production", summary: "Rotate shared platform certificates across production services.", conditions: ["Inventory reconciliation complete", "Expiry alerts cleared", "Service-owner sign-off captured"] },
+  { id: "CHG0039128", day: 27, month: 12, title: "Data-retention policy release", time: "9:00 PM", window: "9:00 PM–11:30 PM CT", service: "Data & Reporting", owner: "L. Martin", risk: "Moderate", type: "Normal", status: "Scheduled", environment: "Production", summary: "Apply updated retention policies and archive validation workflows.", conditions: ["Legal approval complete", "Archive restore tested", "Deletion evidence retained"] },
+  { id: "CHG0039186", day: 10, month: 13, title: "Account-opening release 27.2", time: "8:30 PM", window: "8:30 PM–11:00 PM CT", service: "Account Opening", owner: "B. Lewis", risk: "Moderate", type: "Normal", status: "Scheduled", environment: "Production", summary: "Release workflow reliability and straight-through-processing improvements.", conditions: ["Journey regression green", "Operations playbook updated", "Conversion baseline captured"] },
+  { id: "CHG0039231", day: 24, month: 13, title: "Advisor portal accessibility release", time: "9:00 PM", window: "9:00 PM–10:30 PM CT", service: "Advisor Portal", owner: "K. Patel", risk: "Low", type: "Standard", status: "Ready", environment: "Production", summary: "Deploy accessibility and navigation improvements across core advisor journeys.", conditions: ["Accessibility scan passed", "Keyboard testing complete", "Support notes published"] },
+  { id: "CHG0039294", day: 7, month: 14, title: "Trading platform release 27.3", time: "8:00 PM", window: "8:00 PM–11:30 PM CT", service: "Trading Platform", owner: "M. Rivera", risk: "High", type: "Normal", status: "Scheduled", environment: "Production", summary: "Deliver the March trading release with routing and telemetry enhancements.", conditions: ["Trading certification complete", "Market-open rollback plan", "Business bridge staffed"] },
+  { id: "CHG0039348", day: 21, month: 14, title: "Enterprise recovery exercise", time: "11:00 PM", window: "11:00 PM–2:00 AM CT", service: "Clearing & Settlement", owner: "J. Wu", risk: "High", type: "Normal", status: "Pending approval", environment: "Production", summary: "Exercise application recovery across settlement and identity dependencies.", conditions: ["Scenario approved", "Recovery checkpoints assigned", "Post-exercise review scheduled"] },
+  { id: "CHG0039406", day: 4, month: 15, title: "Multi-region traffic cutover", time: "9:30 PM", window: "9:30 PM–1:00 AM CT", service: "Advisor Portal", owner: "T. Green", risk: "High", type: "Normal", status: "Scheduled", environment: "Production", summary: "Shift advisor traffic to the active-active regional architecture.", conditions: ["Regional readiness green", "NFR sign-off complete", "Failback under 20 minutes"] },
+  { id: "CHG0039462", day: 18, month: 15, title: "QE automation framework update", time: "7:30 PM", window: "7:30 PM–9:00 PM CT", service: "DevOps Platform", owner: "R. Chen", risk: "Low", type: "Standard", status: "Ready", environment: "Production", summary: "Publish the shared test-automation framework and reporting integration.", conditions: ["Compatibility suite green", "Adoption guide published", "Pipeline rollback tagged"] },
+  { id: "CHG0039524", day: 9, month: 16, title: "Observability standard rollout", time: "8:00 PM", window: "8:00 PM–10:00 PM CT", service: "Integration Gateway", owner: "S. Brooks", risk: "Moderate", type: "Normal", status: "Scheduled", environment: "Production", summary: "Complete mandatory service-level telemetry and alerting coverage.", conditions: ["Coverage threshold met", "Alert routing tested", "Runbooks linked"] },
+  { id: "CHG0039581", day: 23, month: 16, title: "Settlement performance release", time: "10:30 PM", window: "10:30 PM–12:30 AM CT", service: "Clearing & Settlement", owner: "J. Wu", risk: "Moderate", type: "Normal", status: "Scheduled", environment: "Production", summary: "Deploy batch throughput and contention improvements.", conditions: ["Performance baseline approved", "Peak simulation passed", "DBA coverage confirmed"] },
+  { id: "CHG0039643", day: 5, month: 17, title: "API platform version upgrade", time: "9:00 PM", window: "9:00 PM–12:00 AM CT", service: "Integration Gateway", owner: "S. Brooks", risk: "High", type: "Normal", status: "Pending approval", environment: "Production", summary: "Upgrade the shared API platform runtime with phased consumer validation.", conditions: ["Consumer matrix signed", "Canary thresholds defined", "Rollback image retained"] },
+  { id: "CHG0039702", day: 19, month: 17, title: "Fiscal-year reporting release", time: "8:30 PM", window: "8:30 PM–11:00 PM CT", service: "Data & Reporting", owner: "L. Martin", risk: "Moderate", type: "Normal", status: "Scheduled", environment: "Production", summary: "Release fiscal-year reporting updates and executive portfolio extracts.", conditions: ["Finance validation complete", "Extract totals reconciled", "Business sign-off assigned"] },
 ];
 
-const monthMeta = [
-  { label: "July 2026", short: "Jul", days: 31, start: 3 },
-  { label: "August 2026", short: "Aug", days: 31, start: 6 },
-  { label: "September 2026", short: "Sep", days: 30, start: 2 },
-];
+const monthMeta = Array.from({ length: 12 }, (_, index) => {
+  const key = 6 + index;
+  const date = new Date(2026, key, 1);
+  return {
+    key,
+    label: date.toLocaleString("en-US", { month: "long", year: "numeric" }),
+    short: date.toLocaleString("en-US", { month: "short" }),
+    year: date.getFullYear(),
+    days: new Date(2026, key + 1, 0).getDate(),
+    start: date.getDay(),
+  };
+});
 
 function StatusPill({ value }: { value: string }) {
   const key = value.toLowerCase().replaceAll(" ", "-");
@@ -117,7 +156,7 @@ function StatusPill({ value }: { value: string }) {
 function MiniTrend({ opened, closed }: { opened: number[]; closed: number[] }) {
   const max = Math.max(...opened, ...closed);
   return (
-    <div className="mini-trend" aria-label="Six month opened versus closed trend">
+    <div className="mini-trend" aria-label="Twelve month opened versus closed trend">
       {trendMonths.map((month, index) => (
         <div className="trend-column" key={month}>
           <div className="trend-bars">
@@ -128,6 +167,147 @@ function MiniTrend({ opened, closed }: { opened: number[]; closed: number[] }) {
         </div>
       ))}
     </div>
+  );
+}
+
+function TrendLineChart({ months, opened, closed, label }: { months: string[]; opened: number[]; closed: number[]; label: string }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const draw = () => {
+      const width = canvas.clientWidth;
+      const height = 250;
+      const ratio = window.devicePixelRatio || 1;
+      canvas.width = Math.max(1, Math.floor(width * ratio));
+      canvas.height = Math.floor(height * ratio);
+      const context = canvas.getContext("2d");
+      if (!context) return;
+      context.setTransform(ratio, 0, 0, ratio, 0, 0);
+      context.clearRect(0, 0, width, height);
+
+      const styles = getComputedStyle(document.documentElement);
+      const muted = styles.getPropertyValue("--muted").trim() || "#69717c";
+      const line = styles.getPropertyValue("--line").trim() || "#ded7c9";
+      const openedColor = styles.getPropertyValue("--amber").trim() || "#b88a3d";
+      const closedColor = styles.getPropertyValue("--green").trim() || "#2f8564";
+      const panel = styles.getPropertyValue("--surface").trim() || "#fffdf7";
+      const padding = { top: 18, right: 14, bottom: 34, left: 38 };
+      const plotWidth = width - padding.left - padding.right;
+      const plotHeight = height - padding.top - padding.bottom;
+      const rawMax = Math.max(...opened, ...closed);
+      const interval = rawMax > 100 ? 50 : 5;
+      const chartMax = Math.max(interval, Math.ceil(rawMax / interval) * interval);
+
+      context.font = "10px Inter, system-ui, sans-serif";
+      context.textBaseline = "middle";
+      for (let gridIndex = 0; gridIndex <= 4; gridIndex += 1) {
+        const y = padding.top + (plotHeight * gridIndex) / 4;
+        const value = Math.round(chartMax - (chartMax * gridIndex) / 4);
+        context.beginPath();
+        context.strokeStyle = line;
+        context.globalAlpha = .7;
+        context.lineWidth = 1;
+        context.moveTo(padding.left, y);
+        context.lineTo(width - padding.right, y);
+        context.stroke();
+        context.globalAlpha = 1;
+        context.fillStyle = muted;
+        context.textAlign = "right";
+        context.fillText(String(value), padding.left - 8, y);
+      }
+
+      const xFor = (index: number) => padding.left + (plotWidth * index) / Math.max(1, months.length - 1);
+      const yFor = (value: number) => padding.top + plotHeight - (value / chartMax) * plotHeight;
+
+      months.forEach((month, index) => {
+        if (width < 520 && index % 2 !== 0 && index !== months.length - 1) return;
+        context.fillStyle = muted;
+        context.textAlign = "center";
+        context.textBaseline = "top";
+        context.fillText(month, xFor(index), height - 22);
+      });
+
+      const drawSeries = (values: number[], color: string) => {
+        context.beginPath();
+        values.forEach((value, index) => {
+          const x = xFor(index);
+          const y = yFor(value);
+          if (index === 0) context.moveTo(x, y);
+          else context.lineTo(x, y);
+        });
+        context.strokeStyle = color;
+        context.lineWidth = 2.75;
+        context.lineJoin = "round";
+        context.lineCap = "round";
+        context.stroke();
+        values.forEach((value, index) => {
+          context.beginPath();
+          context.arc(xFor(index), yFor(value), 3.25, 0, Math.PI * 2);
+          context.fillStyle = panel;
+          context.fill();
+          context.lineWidth = 2;
+          context.strokeStyle = color;
+          context.stroke();
+        });
+      };
+
+      drawSeries(opened, openedColor);
+      drawSeries(closed, closedColor);
+    };
+
+    draw();
+    const observer = new ResizeObserver(draw);
+    observer.observe(canvas);
+    return () => observer.disconnect();
+  }, [months, opened, closed]);
+
+  const accessibleSummary = months.map((month, index) => `${month}: ${opened[index]} opened and ${closed[index]} closed`).join("; ");
+  return <canvas ref={canvasRef} className="line-chart-canvas" role="img" aria-label={`${label}. ${accessibleSummary}`} />;
+}
+
+function OperationalTrends({ openDetail }: { openDetail: (view: View, filter?: FilterState) => void }) {
+  const [range, setRange] = useState<6 | 12>(12);
+  const months = trendMonths.slice(-range);
+  const incidentOpened = trends.incidents.opened.slice(-range);
+  const incidentClosed = trends.incidents.closed.slice(-range);
+  const problemOpened = trends.problems.opened.slice(-range);
+  const problemClosed = trends.problems.closed.slice(-range);
+
+  return (
+    <section className="trend-section" aria-label="Month-over-month operational trends">
+      <div className="section-heading trend-section-heading">
+        <div><span className="eyebrow">Operational flow</span><h2>Opened vs. closed month over month</h2><p>Volume trend through July 2026. Closure lines above intake indicate backlog burn-down.</p></div>
+        <div className="range-toggle" role="group" aria-label="Trend period">
+          <button className={range === 6 ? "active" : ""} onClick={() => setRange(6)}>6M</button>
+          <button className={range === 12 ? "active" : ""} onClick={() => setRange(12)}>12M</button>
+        </div>
+      </div>
+      <div className="line-chart-grid">
+        <article className="panel line-chart-card">
+          <div className="line-chart-header">
+            <div><span className="eyebrow">Service restoration</span><h3>Incident flow</h3></div>
+            <button className="text-link" onClick={() => openDetail("incidents")}>View records →</button>
+          </div>
+          <div className="line-chart-kpis"><div><span>Jul opened</span><strong>214</strong></div><div><span>Jul closed</span><strong>186</strong></div><div className="negative"><span>Net flow</span><strong>+28</strong></div><div><span>Closure ratio</span><strong>87%</strong></div></div>
+          <div className="line-chart-legend"><span><i className="legend-opened" /> Opened</span><span><i className="legend-closed" /> Closed</span></div>
+          <TrendLineChart months={months} opened={incidentOpened} closed={incidentClosed} label="Incident opened and closed trend" />
+          <div className="chart-insight"><span>Watch</span><p>July intake outpaced closures after five months of near-parity or burn-down.</p></div>
+        </article>
+        <article className="panel line-chart-card">
+          <div className="line-chart-header">
+            <div><span className="eyebrow">Root-cause elimination</span><h3>Problem flow</h3></div>
+            <button className="text-link" onClick={() => openDetail("problems")}>View records →</button>
+          </div>
+          <div className="line-chart-kpis"><div><span>Jul opened</span><strong>16</strong></div><div><span>Jul closed</span><strong>11</strong></div><div className="negative"><span>Net flow</span><strong>+5</strong></div><div><span>Closure ratio</span><strong>69%</strong></div></div>
+          <div className="line-chart-legend"><span><i className="legend-opened" /> Opened</span><span><i className="legend-closed" /> Closed</span></div>
+          <TrendLineChart months={months} opened={problemOpened} closed={problemClosed} label="Problem opened and closed trend" />
+          <div className="chart-insight"><span>Action</span><p>Problem creation is accelerating while overdue RCA volume remains concentrated in identity and digital services.</p></div>
+        </article>
+      </div>
+    </section>
   );
 }
 
@@ -226,6 +406,8 @@ function Overview({ openDetail }: { openDetail: (view: View, filter?: FilterStat
         </PortfolioCard>
       </section>
 
+      <OperationalTrends openDetail={openDetail} />
+
       <section className="insights-grid">
         <article className="panel change-health">
           <div className="panel-heading"><div><span className="eyebrow">Change outcomes · 30 days</span><h2>Execution quality</h2></div><button className="text-link" onClick={() => openDetail("changes")}>Review changes →</button></div>
@@ -272,18 +454,20 @@ function DetailTable({ view, initialFilter }: { view: Exclude<View, "overview" |
   const [status, setStatus] = useState(initialFilter.status || "All");
   const [outcome, setOutcome] = useState(initialFilter.outcome || "All");
   const [priority, setPriority] = useState(initialFilter.priority || "All");
+  const [service, setService] = useState(initialFilter.service || "All");
   const [selected, setSelected] = useState<Ticket | null>(null);
 
   const filtered = source.filter((item) => {
     const matchesSearch = `${item.id} ${item.title} ${item.service} ${item.owner}`.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = status === "All" || item.status === status || (status === "SLA at risk" && item.risk === "SLA at risk") || (status === "RCA overdue" && item.risk === "RCA overdue");
     const matchesOutcome = outcome === "All" || item.outcome === outcome || (outcome === "Failed / carried over" && ["Failed", "Carried over"].includes(item.outcome || ""));
-    return matchesSearch && matchesStatus && matchesOutcome && (priority === "All" || item.priority === priority);
+    return matchesSearch && matchesStatus && matchesOutcome && (priority === "All" || item.priority === priority) && (service === "All" || item.service === service);
   });
 
   const labels = { incidents: { title: "Incident records", subtitle: "Service restoration, ownership, and SLA exposure" }, problems: { title: "Problem records", subtitle: "Root-cause progress, known errors, and permanent resolution" }, changes: { title: "Change records", subtitle: "Release readiness, execution quality, and closure outcomes" } }[view];
   const statuses = Array.from(new Set(source.map((item) => item.status)));
   const outcomes = Array.from(new Set(source.map((item) => item.outcome).filter(Boolean))) as string[];
+  const services = Array.from(new Set(source.map((item) => item.service))).sort();
 
   return (
     <section className="detail-view">
@@ -296,7 +480,8 @@ function DetailTable({ view, initialFilter }: { view: Exclude<View, "overview" |
         <label><span>Status</span><select value={status} onChange={(event) => setStatus(event.target.value)}><option>All</option>{statuses.map((item) => <option key={item}>{item}</option>)}{view === "incidents" && <option>SLA at risk</option>}{view === "problems" && <option>RCA overdue</option>}</select></label>
         {view === "changes" && <label><span>Outcome</span><select value={outcome} onChange={(event) => setOutcome(event.target.value)}><option>All</option><option>Failed / carried over</option>{outcomes.map((item) => <option key={item}>{item}</option>)}</select></label>}
         <label><span>Priority</span><select value={priority} onChange={(event) => setPriority(event.target.value)}><option>All</option><option>P1</option><option>P2</option><option>P3</option><option>P4</option></select></label>
-        {(status !== "All" || outcome !== "All" || priority !== "All" || search) && <button className="clear-button" onClick={() => { setStatus("All"); setOutcome("All"); setPriority("All"); setSearch(""); }}>Clear filters</button>}
+        <label><span>Business service</span><select value={service} onChange={(event) => setService(event.target.value)}><option>All</option>{services.map((item) => <option key={item}>{item}</option>)}</select></label>
+        {(status !== "All" || outcome !== "All" || priority !== "All" || service !== "All" || search) && <button className="clear-button" onClick={() => { setStatus("All"); setOutcome("All"); setPriority("All"); setService("All"); setSearch(""); }}>Clear filters</button>}
       </div>
       <div className="table-meta"><span>Showing {filtered.length} representative records</span><small>Fictional data · Last sync 2 minutes ago</small></div>
       <div className="table-shell">
@@ -340,19 +525,23 @@ function ReleaseCalendar({ requestedId }: { requestedId?: string }) {
   const initialMonth = requestedId ? releases.find((item) => item.id === requestedId)?.month ?? 6 : 6;
   const [month, setMonth] = useState(initialMonth);
   const [selected, setSelected] = useState<Release | null>(requestedId ? releases.find((item) => item.id === requestedId) || null : null);
-  const monthData = monthMeta[month - 6];
+  const monthData = monthMeta.find((item) => item.key === month) || monthMeta[0];
   const monthReleases = releases.filter((item) => item.month === month);
-  const cells = Array.from({ length: monthData.start + monthData.days }, (_, index) => index - monthData.start + 1);
+  const totalCells = Math.ceil((monthData.start + monthData.days) / 7) * 7;
+  const cells = Array.from({ length: totalCells }, (_, index) => {
+    const day = index - monthData.start + 1;
+    return day > monthData.days ? 0 : day;
+  });
 
   return (
     <section className="calendar-view">
       <div className="detail-header calendar-header">
-        <div><span className="eyebrow">Change & release management</span><h1>Release calendar</h1><p>Production deployments, readiness, risk, and validation conditions.</p></div>
+        <div><span className="eyebrow">Change & release management</span><h1>Release calendar</h1><p>Rolling 12-month view of production deployments, readiness, risk, and validation conditions.</p></div>
         <div className="calendar-stats"><div><span>This month</span><strong>{monthReleases.length}</strong></div><div><span>High risk</span><strong>{monthReleases.filter((item) => item.risk === "High").length}</strong></div><div><span>Awaiting approval</span><strong>{monthReleases.filter((item) => item.status === "Pending approval").length}</strong></div></div>
       </div>
       <div className="calendar-toolbar">
-        <div className="month-control"><button disabled={month === 6} onClick={() => setMonth(month - 1)} aria-label="Previous month">←</button><strong>{monthData.label}</strong><button disabled={month === 8} onClick={() => setMonth(month + 1)} aria-label="Next month">→</button></div>
-        <div className="month-tabs">{monthMeta.map((item, index) => <button className={month === index + 6 ? "active" : ""} key={item.short} onClick={() => setMonth(index + 6)}>{item.short}</button>)}</div>
+        <div className="month-control"><button disabled={month === 6} onClick={() => setMonth(month - 1)} aria-label="Previous month">←</button><strong>{monthData.label}</strong><button disabled={month === 17} onClick={() => setMonth(month + 1)} aria-label="Next month">→</button></div>
+        <div className="month-tabs">{monthMeta.map((item) => <button className={month === item.key ? "active" : ""} key={item.key} onClick={() => setMonth(item.key)}><span>{item.short}</span><small>{String(item.year).slice(-2)}</small></button>)}</div>
         <div className="calendar-legend"><span><i className="risk-low" /> Low</span><span><i className="risk-moderate" /> Moderate</span><span><i className="risk-high" /> High risk</span></div>
       </div>
       <div className="calendar-shell">
@@ -371,13 +560,14 @@ function ReleaseCalendar({ requestedId }: { requestedId?: string }) {
 }
 
 function ReleaseDrawer({ item, onClose }: { item: Release; onClose: () => void }) {
+  const releaseMonth = monthMeta.find((month) => month.key === item.month) || monthMeta[0];
   return (
     <div className="drawer-backdrop" onClick={onClose} role="presentation">
       <aside className="record-drawer release-drawer" onClick={(event) => event.stopPropagation()} aria-label={`${item.id} release details`}>
         <div className="drawer-top"><div><span className="eyebrow">Production change</span><h2>{item.id}</h2></div><button className="close-button" onClick={onClose} aria-label="Close details">×</button></div>
         <h3>{item.title}</h3>
         <div className="drawer-status"><StatusPill value={item.status} /><StatusPill value={item.risk} /><StatusPill value={item.type} /></div>
-        <div className="release-time-card"><span>Deployment window</span><strong>{monthMeta[item.month - 6].short} {item.day}, 2026</strong><small>{item.window}</small></div>
+        <div className="release-time-card"><span>Deployment window</span><strong>{releaseMonth.short} {item.day}, {releaseMonth.year}</strong><small>{item.window}</small></div>
         <p className="release-summary">{item.summary}</p>
         <dl className="detail-list"><div><dt>Business service</dt><dd>{item.service}</dd></div><div><dt>Change owner</dt><dd>{item.owner}</dd></div><div><dt>Environment</dt><dd>{item.environment}</dd></div><div><dt>Change type</dt><dd>{item.type}</dd></div></dl>
         <div className="drawer-section conditions"><span>Closure & validation conditions</span>{item.conditions.map((condition) => <div key={condition}><i>✓</i><p>{condition}</p></div>)}</div>

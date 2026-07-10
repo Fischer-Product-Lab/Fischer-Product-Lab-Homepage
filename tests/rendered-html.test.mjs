@@ -41,6 +41,10 @@ test("ships the finished product metadata and removes starter assets", async () 
   ]);
 
   assert.match(page, /ReleaseCalendar/);
+  assert.match(page, /TrendLineChart/);
+  assert.match(page, /Opened vs\. closed month over month/);
+  assert.match(page, /Array\.from\(\{ length: 12 \}/);
+  assert.match(page, /Business service/);
   assert.match(page, /DetailTable/);
   assert.match(page, /Closed with issues/);
   assert.match(page, /Carried over/);
