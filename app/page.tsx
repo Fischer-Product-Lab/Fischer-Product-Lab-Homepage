@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-type View = "overview" | "incidents" | "problems" | "changes" | "releases";
-type FilterState = { status?: string; outcome?: string; priority?: string; service?: string };
+type View = "overview" | "services" | "incidents" | "problems" | "changes" | "releases";
+type FilterState = { status?: string; outcome?: string; priority?: string; service?: string; search?: string; releaseId?: string };
 
 type Ticket = {
   id: string;
@@ -35,8 +35,45 @@ type Release = {
   conditions: string[];
 };
 
+type ServiceHealth = {
+  name: string;
+  owner: string;
+  score: number;
+  status: "At risk" | "Watch" | "Healthy";
+  availability: string;
+  incidents: number;
+  p1: number;
+  mttr: string;
+  sla: string;
+  problems: number;
+  overdueRca: number;
+  changeSuccess: string;
+  nextRelease: string;
+  releaseRisk: "Low" | "Moderate" | "High";
+  trend: number;
+  decision: string;
+};
+
+type LineageItem = {
+  label: string;
+  id: string;
+  view: Exclude<View, "overview" | "services">;
+};
+
+type Lineage = {
+  title: string;
+  service: string;
+  impact: string;
+  owner: string;
+  due: string;
+  decision: string;
+  state: "Decision due" | "In remediation" | "Monitoring";
+  items: LineageItem[];
+};
+
 const navItems: { id: View; label: string; short: string }[] = [
   { id: "overview", label: "Portfolio overview", short: "Overview" },
+  { id: "services", label: "Service health", short: "Services" },
   { id: "incidents", label: "Incidents", short: "Incidents" },
   { id: "problems", label: "Problems", short: "Problems" },
   { id: "changes", label: "Changes", short: "Changes" },
@@ -50,6 +87,25 @@ const trends = {
   problems: { opened: [12, 14, 13, 11, 16, 14, 15, 13, 18, 17, 14, 16], closed: [10, 11, 15, 12, 13, 16, 11, 14, 12, 15, 15, 11] },
   changes: { opened: [68, 74, 77, 81, 75, 79, 72, 79, 83, 91, 88, 96], closed: [65, 72, 79, 78, 77, 82, 69, 76, 81, 86, 84, 80] },
 };
+
+const changeOutcomes = { successful: 68, withIssues: 9, failed: 3, carried: 2 };
+const portfolioMetrics = {
+  incidents: { open: 47, closed: trends.incidents.closed.at(-1) || 0, p1: 2, slaRisk: 8, mttr: "3h 12m" },
+  problems: { open: 18, closed: trends.problems.closed.at(-1) || 0, overdueRca: 6, knownErrors: 9, repeatDrivers: 4 },
+  changes: { open: 24, closed: trends.changes.closed.at(-1) || 0, ...changeOutcomes },
+};
+const changeSuccessRate = Math.round((changeOutcomes.successful / portfolioMetrics.changes.closed) * 1000) / 10;
+const healthDimensions = [
+  { label: "Availability", value: 88, weight: 20, definition: "Availability and critical-service disruption exposure" },
+  { label: "Restoration", value: 78, weight: 25, definition: "Incident backlog, SLA risk, priority, and MTTR" },
+  { label: "Root cause", value: 76, weight: 20, definition: "Problem aging, overdue RCA, and repeat drivers" },
+  { label: "Change quality", value: 85, weight: 20, definition: "Successful closures adjusted for failures and change-caused incidents" },
+  { label: "Release readiness", value: 84, weight: 15, definition: "Approval, validation, risk, and near-term release concentration" },
+];
+const portfolioScore = Math.round(healthDimensions.reduce((total, item) => total + item.value * (item.weight / 100), 0));
+const demoAsOf = new Date(2026, 6, 9);
+const currentMonthKey = demoAsOf.getMonth();
+const dataThroughLabel = demoAsOf.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
 const incidents: Ticket[] = [
   { id: "INC0091842", title: "Intermittent authentication failures", status: "In Progress", priority: "P1", service: "Client Identity", owner: "IAM Operations", opened: "Jul 9, 8:12 AM", age: "3h 18m", risk: "SLA at risk" },
@@ -101,7 +157,7 @@ const changes: Ticket[] = [
   { id: "CHG0037932", title: "Account-opening orchestration patch", status: "Closed", priority: "P2", service: "Account Opening", owner: "B. Lewis", opened: "May 30", age: "40d", outcome: "Failed", risk: "High" },
 ];
 
-const releases: Release[] = [
+const releaseRecords: Release[] = [
   { id: "CHG0038299", day: 2, month: 6, title: "API gateway capacity increase", time: "10:00 PM", window: "10:00 PM–11:30 PM CT", service: "Integration Gateway", owner: "S. Brooks", risk: "Low", type: "Standard", status: "Complete", environment: "Production", summary: "Increase gateway worker capacity and tune autoscaling thresholds ahead of quarterly volume.", conditions: ["Synthetic checks green", "Error rate below 0.5%", "Rollback image retained 24h"] },
   { id: "CHG0038324", day: 6, month: 6, title: "Advisor portal upload release", time: "9:00 PM", window: "9:00 PM–11:00 PM CT", service: "Advisor Portal", owner: "K. Patel", risk: "Moderate", type: "Normal", status: "Complete", environment: "Production", summary: "Deploy retry-handling improvements for document uploads.", conditions: ["Post-deploy upload test required", "Support bridge held 60m", "Additional monitoring added after close"] },
   { id: "CHG0038371", day: 10, month: 6, title: "Settlement DB optimization", time: "11:00 PM", window: "11:00 PM–12:30 AM CT", service: "Clearing & Settlement", owner: "J. Wu", risk: "Moderate", type: "Normal", status: "Ready", environment: "Production", summary: "Apply index optimizations to reduce settlement batch contention.", conditions: ["DBA validation complete", "Batch baseline captured", "Rollback script tested"] },
@@ -133,11 +189,12 @@ const releases: Release[] = [
   { id: "CHG0039581", day: 23, month: 16, title: "Settlement performance release", time: "10:30 PM", window: "10:30 PM–12:30 AM CT", service: "Clearing & Settlement", owner: "J. Wu", risk: "Moderate", type: "Normal", status: "Scheduled", environment: "Production", summary: "Deploy batch throughput and contention improvements.", conditions: ["Performance baseline approved", "Peak simulation passed", "DBA coverage confirmed"] },
   { id: "CHG0039643", day: 5, month: 17, title: "API platform version upgrade", time: "9:00 PM", window: "9:00 PM–12:00 AM CT", service: "Integration Gateway", owner: "S. Brooks", risk: "High", type: "Normal", status: "Pending approval", environment: "Production", summary: "Upgrade the shared API platform runtime with phased consumer validation.", conditions: ["Consumer matrix signed", "Canary thresholds defined", "Rollback image retained"] },
   { id: "CHG0039702", day: 19, month: 17, title: "Fiscal-year reporting release", time: "8:30 PM", window: "8:30 PM–11:00 PM CT", service: "Data & Reporting", owner: "L. Martin", risk: "Moderate", type: "Normal", status: "Scheduled", environment: "Production", summary: "Release fiscal-year reporting updates and executive portfolio extracts.", conditions: ["Finance validation complete", "Extract totals reconciled", "Business sign-off assigned"] },
-].map((release) => release.month > 6 ? { ...release, month: release.month - 12, status: "Complete" as const } : release);
+];
+const releases: Release[] = releaseRecords.map((release) => release.month > currentMonthKey ? { ...release, month: release.month - 12, status: "Complete" as const } : release);
 
 const monthMeta = Array.from({ length: 12 }, (_, index) => {
-  const key = -5 + index;
-  const date = new Date(2026, key, 1);
+  const key = currentMonthKey - 11 + index;
+  const date = new Date(demoAsOf.getFullYear(), key, 1);
   return {
     key,
     label: date.toLocaleString("en-US", { month: "long", year: "numeric" }),
@@ -147,6 +204,63 @@ const monthMeta = Array.from({ length: 12 }, (_, index) => {
     start: date.getDay(),
   };
 });
+
+const serviceHealth: ServiceHealth[] = [
+  { name: "Client Identity", owner: "IAM Engineering", score: 68, status: "At risk", availability: "99.71%", incidents: 12, p1: 1, mttr: "4h 08m", sla: "82%", problems: 3, overdueRca: 2, changeSuccess: "78%", nextRelease: "Jul 17", releaseRisk: "High", trend: -5, decision: "Approve token-cache rollback staffing and permanent-fix window" },
+  { name: "Trading Platform", owner: "Market Data", score: 76, status: "Watch", availability: "99.89%", incidents: 8, p1: 0, mttr: "2h 41m", sla: "91%", problems: 2, overdueRca: 1, changeSuccess: "83%", nextRelease: "Jul 14", releaseRisk: "Moderate", trend: -2, decision: "Resolve CAB evidence before the market-data patch window" },
+  { name: "Data & Reporting", owner: "Data Operations", score: 72, status: "Watch", availability: "99.82%", incidents: 9, p1: 0, mttr: "3h 26m", sla: "87%", problems: 3, overdueRca: 1, changeSuccess: "75%", nextRelease: "Jul 24", releaseRisk: "Moderate", trend: -4, decision: "Confirm validation owner after the failed cluster upgrade" },
+  { name: "Clearing & Settlement", owner: "Batch Services", score: 81, status: "Watch", availability: "99.93%", incidents: 6, p1: 0, mttr: "2h 18m", sla: "94%", problems: 2, overdueRca: 1, changeSuccess: "88%", nextRelease: "Jul 10", releaseRisk: "Moderate", trend: 1, decision: "Validate batch baseline before index optimization" },
+  { name: "Advisor Portal", owner: "Digital Experience", score: 84, status: "Healthy", availability: "99.95%", incidents: 5, p1: 0, mttr: "1h 54m", sla: "96%", problems: 2, overdueRca: 1, changeSuccess: "91%", nextRelease: "Jul 21", releaseRisk: "High", trend: 3, decision: "Confirm rollback checkpoint for blue-green cutover" },
+  { name: "Integration Gateway", owner: "API Platform", score: 91, status: "Healthy", availability: "99.98%", incidents: 3, p1: 0, mttr: "1h 22m", sla: "99%", problems: 1, overdueRca: 0, changeSuccess: "96%", nextRelease: "Jul 28", releaseRisk: "Low", trend: 4, decision: "No leadership decision required" },
+];
+
+const lineages: Lineage[] = [
+  {
+    title: "Peak-load authentication failure",
+    service: "Client Identity",
+    impact: "P1 disruption with SLA exposure and repeat authentication failures",
+    owner: "A. Shah",
+    due: "Jul 10",
+    decision: "Approve rollback staffing and the permanent-fix deployment window",
+    state: "Decision due",
+    items: [
+      { label: "Incident", id: "INC0091842", view: "incidents" },
+      { label: "Problem", id: "PRB0012488", view: "problems" },
+      { label: "Fix change", id: "CHG0038412", view: "changes" },
+      { label: "Release", id: "CHG0038412", view: "releases" },
+    ],
+  },
+  {
+    title: "Reporting cluster validation failure",
+    service: "Data & Reporting",
+    impact: "Failed change increased delivery risk for the July reporting release",
+    owner: "L. Martin",
+    due: "Jul 12",
+    decision: "Confirm remediation evidence and a named business-validation owner",
+    state: "In remediation",
+    items: [
+      { label: "Incident", id: "INC0091544", view: "incidents" },
+      { label: "Problem", id: "PRB0012416", view: "problems" },
+      { label: "Failed change", id: "CHG0038210", view: "changes" },
+      { label: "Release", id: "CHG0038474", view: "releases" },
+    ],
+  },
+  {
+    title: "Settlement batch contention",
+    service: "Clearing & Settlement",
+    impact: "Recurring processing-window pressure with a permanent fix ready",
+    owner: "J. Wu",
+    due: "Jul 11",
+    decision: "Review post-release batch performance against the captured baseline",
+    state: "Monitoring",
+    items: [
+      { label: "Incident", id: "INC0091764", view: "incidents" },
+      { label: "Problem", id: "PRB0012451", view: "problems" },
+      { label: "Fix change", id: "CHG0038371", view: "changes" },
+      { label: "Release", id: "CHG0038371", view: "releases" },
+    ],
+  },
+];
 
 function StatusPill({ value }: { value: string }) {
   const key = value.toLowerCase().replaceAll(" ", "-");
@@ -275,11 +389,16 @@ function OperationalTrends({ openDetail }: { openDetail: (view: View, filter?: F
   const incidentClosed = trends.incidents.closed.slice(-range);
   const problemOpened = trends.problems.opened.slice(-range);
   const problemClosed = trends.problems.closed.slice(-range);
+  const currentLabel = trendMonths.at(-1) || "Current";
+  const currentIncidentOpened = trends.incidents.opened.at(-1) || 0;
+  const currentIncidentClosed = trends.incidents.closed.at(-1) || 0;
+  const currentProblemOpened = trends.problems.opened.at(-1) || 0;
+  const currentProblemClosed = trends.problems.closed.at(-1) || 0;
 
   return (
     <section className="trend-section" aria-label="Month-over-month operational trends">
       <div className="section-heading trend-section-heading">
-        <div><span className="eyebrow">Operational flow</span><h2>Opened vs. closed month over month</h2><p>Volume trend through July 2026. Closure lines above intake indicate backlog burn-down.</p></div>
+        <div><span className="eyebrow">Operational flow</span><h2>Opened vs. closed month over month</h2><p>Volume trend through {dataThroughLabel}. Closure lines above intake indicate backlog burn-down.</p></div>
         <div className="range-toggle" role="group" aria-label="Trend period">
           <button className={range === 6 ? "active" : ""} onClick={() => setRange(6)}>6M</button>
           <button className={range === 12 ? "active" : ""} onClick={() => setRange(12)}>12M</button>
@@ -291,7 +410,7 @@ function OperationalTrends({ openDetail }: { openDetail: (view: View, filter?: F
             <div><span className="eyebrow">Service restoration</span><h3>Incident flow</h3></div>
             <button className="text-link" onClick={() => openDetail("incidents")}>View records →</button>
           </div>
-          <div className="line-chart-kpis"><div><span>Jul opened</span><strong>214</strong></div><div><span>Jul closed</span><strong>186</strong></div><div className="negative"><span>Net flow</span><strong>+28</strong></div><div><span>Closure ratio</span><strong>87%</strong></div></div>
+          <div className="line-chart-kpis"><div><span>{currentLabel} opened</span><strong>{currentIncidentOpened}</strong></div><div><span>{currentLabel} closed</span><strong>{currentIncidentClosed}</strong></div><div className="negative"><span>Net flow</span><strong>{currentIncidentOpened - currentIncidentClosed > 0 ? "+" : ""}{currentIncidentOpened - currentIncidentClosed}</strong></div><div><span>Closure ratio</span><strong>{Math.round((currentIncidentClosed / currentIncidentOpened) * 100)}%</strong></div></div>
           <div className="line-chart-legend"><span><i className="legend-opened" /> Opened</span><span><i className="legend-closed" /> Closed</span></div>
           <TrendLineChart months={months} opened={incidentOpened} closed={incidentClosed} label="Incident opened and closed trend" />
           <div className="chart-insight"><span>Watch</span><p>July intake outpaced closures after five months of near-parity or burn-down.</p></div>
@@ -301,7 +420,7 @@ function OperationalTrends({ openDetail }: { openDetail: (view: View, filter?: F
             <div><span className="eyebrow">Root-cause elimination</span><h3>Problem flow</h3></div>
             <button className="text-link" onClick={() => openDetail("problems")}>View records →</button>
           </div>
-          <div className="line-chart-kpis"><div><span>Jul opened</span><strong>16</strong></div><div><span>Jul closed</span><strong>11</strong></div><div className="negative"><span>Net flow</span><strong>+5</strong></div><div><span>Closure ratio</span><strong>69%</strong></div></div>
+          <div className="line-chart-kpis"><div><span>{currentLabel} opened</span><strong>{currentProblemOpened}</strong></div><div><span>{currentLabel} closed</span><strong>{currentProblemClosed}</strong></div><div className="negative"><span>Net flow</span><strong>{currentProblemOpened - currentProblemClosed > 0 ? "+" : ""}{currentProblemOpened - currentProblemClosed}</strong></div><div><span>Closure ratio</span><strong>{Math.round((currentProblemClosed / currentProblemOpened) * 100)}%</strong></div></div>
           <div className="line-chart-legend"><span><i className="legend-opened" /> Opened</span><span><i className="legend-closed" /> Closed</span></div>
           <TrendLineChart months={months} opened={problemOpened} closed={problemClosed} label="Problem opened and closed trend" />
           <div className="chart-insight"><span>Action</span><p>Problem creation is accelerating while overdue RCA volume remains concentrated in identity and digital services.</p></div>
@@ -311,13 +430,119 @@ function OperationalTrends({ openDetail }: { openDetail: (view: View, filter?: F
   );
 }
 
-function MetricButton({ label, value, note, tone = "blue", onClick }: { label: string; value: string; note: string; tone?: string; onClick: () => void }) {
+function MetricMethodology() {
   return (
-    <button className={`metric-button tone-${tone}`} onClick={onClick}>
-      <span className="metric-label">{label}</span>
-      <span className="metric-value">{value}</span>
-      <span className="metric-note">{note} <b aria-hidden="true">→</b></span>
-    </button>
+    <details className="metric-methodology">
+      <summary>
+        <span><strong>How Portfolio Health is calculated</strong><small>Five weighted operating dimensions · synthetic demonstration</small></span>
+        <b>{portfolioScore}/100</b>
+      </summary>
+      <div className="methodology-grid">
+        {healthDimensions.map((dimension) => (
+          <div key={dimension.label}>
+            <span>{dimension.label}<small>{dimension.weight}% weight</small></span>
+            <strong>{dimension.value}</strong>
+            <i><b style={{ width: `${dimension.value}%` }} /></i>
+            <p>{dimension.definition}</p>
+          </div>
+        ))}
+      </div>
+      <p className="methodology-note">The score is a weighted synthetic index for this demo. It is not a native ServiceNow measure and should be recalibrated to an organization&apos;s targets before production use.</p>
+    </details>
+  );
+}
+
+function ServiceHealthPreview({ openDetail }: { openDetail: (view: View, filter?: FilterState) => void }) {
+  return (
+    <section className="panel service-preview">
+      <div className="panel-heading">
+        <div><span className="eyebrow">Portfolio by business service</span><h2>Service health and accountability</h2></div>
+        <button className="text-link" onClick={() => openDetail("services")}>Open service portfolio →</button>
+      </div>
+      <div className="service-preview-grid">
+        {serviceHealth.slice(0, 4).map((service) => (
+          <article key={service.name}>
+            <div className="service-score"><strong>{service.score}</strong><StatusPill value={service.status} /></div>
+            <h3>{service.name}</h3>
+            <p>{service.owner}</p>
+            <dl>
+              <div><dt>Incidents</dt><dd>{service.incidents}</dd></div>
+              <div><dt>SLA</dt><dd>{service.sla}</dd></div>
+              <div><dt>RCA due</dt><dd>{service.overdueRca}</dd></div>
+              <div><dt>Change success</dt><dd>{service.changeSuccess}</dd></div>
+            </dl>
+            <button onClick={() => openDetail("incidents", { service: service.name })}>Review service records <span>→</span></button>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function LineagePanel({ openDetail }: { openDetail: (view: View, filter?: FilterState) => void }) {
+  const openItem = (item: LineageItem) => {
+    if (item.view === "releases") openDetail("releases", { releaseId: item.id });
+    else openDetail(item.view, { search: item.id });
+  };
+
+  return (
+    <section className="lineage-section" aria-label="Linked operational record lineage">
+      <div className="section-heading">
+        <div><span className="eyebrow">Cause to permanent resolution</span><h2>Linked record lineage</h2><p>Trace disruption through root cause, remediation, release, and operating decision.</p></div>
+      </div>
+      <div className="lineage-grid">
+        {lineages.map((lineage) => (
+          <article className="panel lineage-card" key={lineage.title}>
+            <div className="lineage-heading"><div><StatusPill value={lineage.state} /><h3>{lineage.title}</h3><p>{lineage.service} · {lineage.impact}</p></div><span>{lineage.due}</span></div>
+            <div className="lineage-track">
+              {lineage.items.map((item, index) => (
+                <div key={`${lineage.title}-${item.label}`}>
+                  <button onClick={() => openItem(item)}><span>{item.label}</span><strong>{item.id}</strong></button>
+                  {index < lineage.items.length - 1 && <i aria-hidden="true">→</i>}
+                </div>
+              ))}
+            </div>
+            <div className="decision-row"><span>Decision / exit criterion</span><strong>{lineage.decision}</strong><small>Accountable: {lineage.owner}</small></div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ServicePortfolio({ openDetail }: { openDetail: (view: View, filter?: FilterState) => void }) {
+  return (
+    <section className="service-view">
+      <div className="detail-header service-header">
+        <div><span className="eyebrow">Portfolio operating model</span><h1>Service health</h1><p>Compare operational exposure, remediation debt, change quality, and accountable decisions by business service.</p></div>
+        <div className="summary-chip"><span>Services at risk</span><strong>{serviceHealth.filter((service) => service.status === "At risk").length}</strong></div>
+      </div>
+      <div className="service-scorecard-grid">
+        {serviceHealth.map((service) => (
+          <article className="panel service-scorecard" key={service.name}>
+            <div className="service-scorecard-heading">
+              <div><span className="eyebrow">{service.owner}</span><h2>{service.name}</h2></div>
+              <div className="service-score"><strong>{service.score}</strong><StatusPill value={service.status} /></div>
+            </div>
+            <div className="service-score-track"><i style={{ width: `${service.score}%` }} /></div>
+            <dl className="service-kpis">
+              <div><dt>Availability</dt><dd>{service.availability}</dd></div>
+              <div><dt>Incidents</dt><dd>{service.incidents}{service.p1 > 0 && <small>{service.p1} P1</small>}</dd></div>
+              <div><dt>MTTR</dt><dd>{service.mttr}</dd></div>
+              <div><dt>SLA</dt><dd>{service.sla}</dd></div>
+              <div><dt>Open problems</dt><dd>{service.problems}</dd></div>
+              <div><dt>RCA overdue</dt><dd>{service.overdueRca}</dd></div>
+              <div><dt>Change success</dt><dd>{service.changeSuccess}</dd></div>
+              <div><dt>Next release</dt><dd>{service.nextRelease}<small>{service.releaseRisk} risk</small></dd></div>
+            </dl>
+            <div className="service-decision"><span>Leadership action</span><p>{service.decision}</p></div>
+            <div className="service-actions"><button onClick={() => openDetail("incidents", { service: service.name })}>Incidents</button><button onClick={() => openDetail("problems", { service: service.name })}>Problems</button><button onClick={() => openDetail("changes", { service: service.name })}>Changes</button></div>
+          </article>
+        ))}
+      </div>
+      <LineagePanel openDetail={openDetail} />
+      <MetricMethodology />
+    </section>
   );
 }
 
@@ -363,15 +588,15 @@ function Overview({ openDetail }: { openDetail: (view: View, filter?: FilterStat
     <>
       <section className="hero-band">
         <div>
-          <div className="hero-kicker"><span className="live-dot" /> ServiceNow portfolio feed</div>
+          <div className="hero-kicker"><span className="live-dot" /> Simulated ServiceNow portfolio feed</div>
           <h1>Operational health, in one decision-ready view.</h1>
           <p>Track service disruption, root-cause progress, change execution, and release risk across the portfolio.</p>
         </div>
         <div className="hero-aside">
           <span>Portfolio health</span>
-          <strong>82</strong>
-          <div className="score-track"><i style={{ width: "82%" }} /></div>
-          <small>Stable · 3 points above June</small>
+          <strong>{portfolioScore}</strong>
+          <div className="score-track"><i style={{ width: `${portfolioScore}%` }} /></div>
+          <small>Weighted synthetic index · 5 dimensions</small>
         </div>
       </section>
 
@@ -383,28 +608,32 @@ function Overview({ openDetail }: { openDetail: (view: View, filter?: FilterStat
         <button onClick={() => openDetail("changes", { outcome: "Failed / carried over" })}><strong>5</strong><span>Failed / carried</span><small>Rolling 30 days</small></button>
       </section>
 
+      <MetricMethodology />
+
       <section className="section-heading">
         <div><span className="eyebrow">Core ITSM signals</span><h2>Flow and outcomes</h2></div>
-        <div className="as-of">Data through Jul 9, 2026 · <span>Fictional dataset</span></div>
+        <div className="as-of">Data through {dataThroughLabel} · <span>Synthetic demo dataset</span></div>
       </section>
 
       <section className="portfolio-grid">
-        <PortfolioCard eyebrow="Service restoration" title="Incidents" opened="47" closed="186" trend={trends.incidents} onOpen={() => openDetail("incidents")}>
-          <button onClick={() => openDetail("incidents", { priority: "P1" })}><strong className="critical-text">2</strong><span>P1 active</span></button>
-          <button onClick={() => openDetail("incidents", { status: "SLA at risk" })}><strong>8</strong><span>SLA risk</span></button>
-          <div><strong>3h 12m</strong><span>MTTR</span></div>
+        <PortfolioCard eyebrow="Service restoration" title="Incidents" opened={String(portfolioMetrics.incidents.open)} closed={String(portfolioMetrics.incidents.closed)} trend={trends.incidents} onOpen={() => openDetail("incidents")}>
+          <button onClick={() => openDetail("incidents", { priority: "P1" })}><strong className="critical-text">{portfolioMetrics.incidents.p1}</strong><span>P1 active</span></button>
+          <button onClick={() => openDetail("incidents", { status: "SLA at risk" })}><strong>{portfolioMetrics.incidents.slaRisk}</strong><span>SLA risk</span></button>
+          <div><strong>{portfolioMetrics.incidents.mttr}</strong><span>MTTR</span></div>
         </PortfolioCard>
-        <PortfolioCard eyebrow="Root-cause elimination" title="Problems" opened="18" closed="11" trend={trends.problems} onOpen={() => openDetail("problems")}>
-          <button onClick={() => openDetail("problems", { status: "RCA overdue" })}><strong className="warning-text">6</strong><span>RCA overdue</span></button>
-          <button onClick={() => openDetail("problems", { status: "Known Error" })}><strong>9</strong><span>Known errors</span></button>
-          <div><strong>4</strong><span>Repeat drivers</span></div>
+        <PortfolioCard eyebrow="Root-cause elimination" title="Problems" opened={String(portfolioMetrics.problems.open)} closed={String(portfolioMetrics.problems.closed)} trend={trends.problems} onOpen={() => openDetail("problems")}>
+          <button onClick={() => openDetail("problems", { status: "RCA overdue" })}><strong className="warning-text">{portfolioMetrics.problems.overdueRca}</strong><span>RCA overdue</span></button>
+          <button onClick={() => openDetail("problems", { status: "Known Error" })}><strong>{portfolioMetrics.problems.knownErrors}</strong><span>Known errors</span></button>
+          <div><strong>{portfolioMetrics.problems.repeatDrivers}</strong><span>Repeat drivers</span></div>
         </PortfolioCard>
-        <PortfolioCard eyebrow="Release execution" title="Changes" opened="24" closed="80" trend={trends.changes} onOpen={() => openDetail("changes")}>
-          <button onClick={() => openDetail("changes", { outcome: "Closed with issues" })}><strong className="warning-text">9</strong><span>With issues</span></button>
-          <button onClick={() => openDetail("changes", { outcome: "Failed / carried over" })}><strong className="critical-text">5</strong><span>Failed / carried</span></button>
-          <div><strong>85.0%</strong><span>Success rate</span></div>
+        <PortfolioCard eyebrow="Release execution" title="Changes" opened={String(portfolioMetrics.changes.open)} closed={String(portfolioMetrics.changes.closed)} trend={trends.changes} onOpen={() => openDetail("changes")}>
+          <button onClick={() => openDetail("changes", { outcome: "Closed with issues" })}><strong className="warning-text">{portfolioMetrics.changes.withIssues}</strong><span>With issues</span></button>
+          <button onClick={() => openDetail("changes", { outcome: "Failed / carried over" })}><strong className="critical-text">{portfolioMetrics.changes.failed + portfolioMetrics.changes.carried}</strong><span>Failed / carried</span></button>
+          <div><strong>{changeSuccessRate}%</strong><span>Success rate</span></div>
         </PortfolioCard>
       </section>
+
+      <ServiceHealthPreview openDetail={openDetail} />
 
       <OperationalTrends openDetail={openDetail} />
 
@@ -412,12 +641,12 @@ function Overview({ openDetail }: { openDetail: (view: View, filter?: FilterStat
         <article className="panel change-health">
           <div className="panel-heading"><div><span className="eyebrow">Change outcomes · 30 days</span><h2>Execution quality</h2></div><button className="text-link" onClick={() => openDetail("changes")}>Review changes →</button></div>
           <div className="health-content">
-            <div className="donut" role="img" aria-label="Change success rate 85 percent"><div><strong>85.0%</strong><span>successful</span></div></div>
+            <div className="donut" role="img" aria-label={`Change success rate ${changeSuccessRate} percent`}><div><strong>{changeSuccessRate}%</strong><span>successful</span></div></div>
             <div className="outcome-list">
-              <button onClick={() => openDetail("changes", { outcome: "Successful" })}><i className="dot-success" /><span>Successful</span><strong>68</strong></button>
-              <button onClick={() => openDetail("changes", { outcome: "Closed with issues" })}><i className="dot-warning" /><span>Closed with issues</span><strong>9</strong></button>
-              <button onClick={() => openDetail("changes", { outcome: "Failed" })}><i className="dot-danger" /><span>Failed</span><strong>3</strong></button>
-              <button onClick={() => openDetail("changes", { outcome: "Carried over" })}><i className="dot-muted" /><span>Carried over</span><strong>2</strong></button>
+              <button onClick={() => openDetail("changes", { outcome: "Successful" })}><i className="dot-success" /><span>Successful</span><strong>{changeOutcomes.successful}</strong></button>
+              <button onClick={() => openDetail("changes", { outcome: "Closed with issues" })}><i className="dot-warning" /><span>Closed with issues</span><strong>{changeOutcomes.withIssues}</strong></button>
+              <button onClick={() => openDetail("changes", { outcome: "Failed" })}><i className="dot-danger" /><span>Failed</span><strong>{changeOutcomes.failed}</strong></button>
+              <button onClick={() => openDetail("changes", { outcome: "Carried over" })}><i className="dot-muted" /><span>Carried over</span><strong>{changeOutcomes.carried}</strong></button>
             </div>
           </div>
           <div className="caused-row"><span>Incidents caused by change</span><div><b>P1</b><strong>1</strong></div><div><b>P2</b><strong>2</strong></div><div><b>P3</b><strong>3</strong></div></div>
@@ -435,9 +664,9 @@ function Overview({ openDetail }: { openDetail: (view: View, filter?: FilterStat
       <section className="panel release-preview">
         <div className="panel-heading"><div><span className="eyebrow">Next 14 days</span><h2>Release horizon</h2></div><button className="text-link" onClick={() => openDetail("releases")}>Open full calendar →</button></div>
         <div className="release-track">
-          {releases.filter((item) => item.month === 6 && item.day >= 10 && item.day <= 24).map((release) => (
-            <button key={release.id} onClick={() => openDetail("releases", { status: release.id })}>
-              <span className="release-date"><b>JUL</b><strong>{release.day}</strong></span>
+          {releases.filter((item) => item.month === currentMonthKey && item.day > demoAsOf.getDate() && item.day <= demoAsOf.getDate() + 14).map((release) => (
+            <button key={release.id} onClick={() => openDetail("releases", { releaseId: release.id })}>
+              <span className="release-date"><b>{monthMeta.at(-1)?.short.toUpperCase()}</b><strong>{release.day}</strong></span>
               <div><strong>{release.title}</strong><small>{release.service} · {release.time}</small></div>
               <StatusPill value={release.risk} />
             </button>
@@ -448,9 +677,9 @@ function Overview({ openDetail }: { openDetail: (view: View, filter?: FilterStat
   );
 }
 
-function DetailTable({ view, initialFilter }: { view: Exclude<View, "overview" | "releases">; initialFilter: FilterState }) {
+function DetailTable({ view, initialFilter }: { view: Exclude<View, "overview" | "services" | "releases">; initialFilter: FilterState }) {
   const source = view === "incidents" ? incidents : view === "problems" ? problems : changes;
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialFilter.search || "");
   const [status, setStatus] = useState(initialFilter.status || "All");
   const [outcome, setOutcome] = useState(initialFilter.outcome || "All");
   const [priority, setPriority] = useState(initialFilter.priority || "All");
@@ -472,8 +701,8 @@ function DetailTable({ view, initialFilter }: { view: Exclude<View, "overview" |
   return (
     <section className="detail-view">
       <div className="detail-header">
-        <div><span className="eyebrow">ServiceNow record view</span><h1>{labels.title}</h1><p>{labels.subtitle}</p></div>
-        <div className="summary-chip"><span>Portfolio total</span><strong>{view === "incidents" ? "233" : view === "problems" ? "29" : "104"}</strong></div>
+        <div><span className="eyebrow">Synthetic ServiceNow-style record view</span><h1>{labels.title}</h1><p>{labels.subtitle}</p></div>
+        <div className="summary-chip"><span>Portfolio total</span><strong>{view === "incidents" ? portfolioMetrics.incidents.open + portfolioMetrics.incidents.closed : view === "problems" ? portfolioMetrics.problems.open + portfolioMetrics.problems.closed : portfolioMetrics.changes.open + portfolioMetrics.changes.closed}</strong></div>
       </div>
       <div className="filter-bar">
         <label className="search-field"><span>⌕</span><input aria-label="Search records" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search ID, title, service, or owner" /></label>
@@ -483,7 +712,7 @@ function DetailTable({ view, initialFilter }: { view: Exclude<View, "overview" |
         <label><span>Business service</span><select value={service} onChange={(event) => setService(event.target.value)}><option>All</option>{services.map((item) => <option key={item}>{item}</option>)}</select></label>
         {(status !== "All" || outcome !== "All" || priority !== "All" || service !== "All" || search) && <button className="clear-button" onClick={() => { setStatus("All"); setOutcome("All"); setPriority("All"); setService("All"); setSearch(""); }}>Clear filters</button>}
       </div>
-      <div className="table-meta"><span>Showing {filtered.length} representative records</span><small>Fictional data · Last sync 2 minutes ago</small></div>
+      <div className="table-meta"><span>Showing {filtered.length} representative records</span><small>Synthetic data · Snapshot through {dataThroughLabel}</small></div>
       <div className="table-shell">
         <table>
           <thead><tr><th>Record</th><th>Status</th><th>{view === "changes" ? "Outcome" : "Priority"}</th><th>Business service</th><th>Owner / group</th><th>Opened</th><th>Age</th><th aria-label="Open record" /></tr></thead>
@@ -505,28 +734,72 @@ function DetailTable({ view, initialFilter }: { view: Exclude<View, "overview" |
   );
 }
 
+function useModalDialog(onClose: () => void) {
+  const dialogRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
+    const dialog = dialogRef.current;
+    document.body.style.overflow = "hidden";
+    window.requestAnimationFrame(() => dialog?.querySelector<HTMLElement>("[data-dialog-close]")?.focus());
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab" || !dialog) return;
+      const focusable = Array.from(dialog.querySelectorAll<HTMLElement>("button:not(:disabled), [href], input, select, textarea, [tabindex]:not([tabindex='-1'])"));
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      previousFocus?.focus();
+    };
+  }, [onClose]);
+
+  return dialogRef;
+}
+
 function RecordDrawer({ item, view, onClose }: { item: Ticket; view: string; onClose: () => void }) {
+  const dialogRef = useModalDialog(onClose);
+  const titleId = `record-drawer-${item.id}`;
   return (
     <div className="drawer-backdrop" onClick={onClose} role="presentation">
-      <aside className="record-drawer" onClick={(event) => event.stopPropagation()} aria-label={`${item.id} details`}>
-        <div className="drawer-top"><div><span className="eyebrow">{view.slice(0, -1)} record</span><h2>{item.id}</h2></div><button className="close-button" onClick={onClose} aria-label="Close details">×</button></div>
+      <aside ref={dialogRef} className="record-drawer" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>
+        <div className="drawer-top"><div><span className="eyebrow">{view.slice(0, -1)} record</span><h2 id={titleId}>{item.id}</h2></div><button data-dialog-close className="close-button" onClick={onClose} aria-label="Close details">×</button></div>
         <h3>{item.title}</h3>
         <div className="drawer-status"><StatusPill value={item.status} /><span className={`priority-text ${item.priority.toLowerCase()}`}>{item.priority}</span>{item.outcome && <StatusPill value={item.outcome} />}</div>
         <dl className="detail-list"><div><dt>Business service</dt><dd>{item.service}</dd></div><div><dt>Assignment</dt><dd>{item.owner}</dd></div><div><dt>Opened</dt><dd>{item.opened}</dd></div><div><dt>Current age</dt><dd>{item.age}</dd></div></dl>
         <div className="drawer-section"><span>Portfolio context</span><p>{view === "incidents" ? "Service restoration is active. Track SLA exposure and link any repeat pattern to a problem record." : view === "problems" ? "Root-cause ownership is established. Permanent-resolution evidence and linked incident reduction remain the exit criteria." : "Readiness, execution evidence, and post-implementation validation determine the final change outcome."}</p></div>
         <div className="activity"><span>Recent activity</span><div><i /><p><strong>Record updated</strong><small>12 minutes ago · {item.owner}</small></p></div><div><i /><p><strong>Portfolio signal recalculated</strong><small>2 hours ago · Automated feed</small></p></div><div><i /><p><strong>Leadership view synchronized</strong><small>Today · Portfolio automation</small></p></div></div>
-        <button className="primary-action">Open in ServiceNow ↗</button>
+        <button className="demo-action" disabled>ServiceNow link unavailable in demo</button>
       </aside>
     </div>
   );
 }
 
 function ReleaseCalendar({ requestedId }: { requestedId?: string }) {
-  const initialMonth = requestedId ? releases.find((item) => item.id === requestedId)?.month ?? 6 : 6;
+  const initialMonth = requestedId ? releases.find((item) => item.id === requestedId)?.month ?? currentMonthKey : currentMonthKey;
   const [month, setMonth] = useState(initialMonth);
   const [selected, setSelected] = useState<Release | null>(requestedId ? releases.find((item) => item.id === requestedId) || null : null);
+  const [display, setDisplay] = useState<"calendar" | "agenda">("calendar");
   const monthData = monthMeta.find((item) => item.key === month) || monthMeta[0];
-  const monthReleases = releases.filter((item) => item.month === month);
+  const monthReleases = releases.filter((item) => item.month === month).sort((left, right) => left.day - right.day);
   const totalCells = Math.ceil((monthData.start + monthData.days) / 7) * 7;
   const cells = Array.from({ length: totalCells }, (_, index) => {
     const day = index - monthData.start + 1;
@@ -540,20 +813,35 @@ function ReleaseCalendar({ requestedId }: { requestedId?: string }) {
         <div className="calendar-stats"><div><span>This month</span><strong>{monthReleases.length}</strong></div><div><span>High risk</span><strong>{monthReleases.filter((item) => item.risk === "High").length}</strong></div><div><span>Awaiting approval</span><strong>{monthReleases.filter((item) => item.status === "Pending approval").length}</strong></div></div>
       </div>
       <div className="calendar-toolbar">
-        <div className="month-control"><button disabled={month === -5} onClick={() => setMonth(month - 1)} aria-label="Previous month">←</button><strong>{monthData.label}</strong><button disabled={month === 6} onClick={() => setMonth(month + 1)} aria-label="Next month">→</button></div>
+        <div className="month-control"><button disabled={month === monthMeta[0].key} onClick={() => setMonth(month - 1)} aria-label="Previous month">←</button><strong>{monthData.label}</strong><button disabled={month === monthMeta.at(-1)?.key} onClick={() => setMonth(month + 1)} aria-label="Next month">→</button></div>
         <div className="month-tabs">{monthMeta.map((item) => <button className={month === item.key ? "active" : ""} key={item.key} onClick={() => setMonth(item.key)}><span>{item.short}</span><small>{String(item.year).slice(-2)}</small></button>)}</div>
-        <div className="calendar-legend"><span><i className="risk-low" /> Low</span><span><i className="risk-moderate" /> Moderate</span><span><i className="risk-high" /> High risk</span></div>
+        <div className="calendar-toolbar-actions">
+          <div className="calendar-view-toggle" role="group" aria-label="Release display"><button className={display === "calendar" ? "active" : ""} onClick={() => setDisplay("calendar")}>Calendar</button><button className={display === "agenda" ? "active" : ""} onClick={() => setDisplay("agenda")}>Agenda</button></div>
+          <div className="calendar-legend"><span><i className="risk-low" /> Low</span><span><i className="risk-moderate" /> Moderate</span><span><i className="risk-high" /> High risk</span></div>
+        </div>
       </div>
-      <div className="calendar-shell">
+      {display === "calendar" && <div className="calendar-shell">
         <div className="weekday-row">{["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => <div key={day}>{day}</div>)}</div>
         <div className="calendar-grid">
           {cells.map((day, index) => {
             if (day < 1) return <div className="calendar-cell muted-cell" key={`empty-${index}`} />;
             const items = monthReleases.filter((item) => item.day === day);
-            return <div className={`calendar-cell ${month === 6 && day === 9 ? "today" : ""}`} key={day}><div className="day-number"><span>{day}</span>{month === 6 && day === 9 && <b>Today</b>}</div>{items.map((item) => <button className={`calendar-event risk-${item.risk.toLowerCase()}`} key={item.id} onClick={() => setSelected(item)}><span>{item.time}</span><strong>{item.title}</strong><small>{item.id}</small></button>)}</div>;
+            const isToday = month === currentMonthKey && day === demoAsOf.getDate();
+            return <div className={`calendar-cell ${isToday ? "today" : ""}`} key={day}><div className="day-number"><span>{day}</span>{isToday && <b>Today</b>}</div>{items.map((item) => <button className={`calendar-event risk-${item.risk.toLowerCase()}`} key={item.id} onClick={() => setSelected(item)}><span>{item.time}</span><strong>{item.title}</strong><small>{item.id}</small></button>)}</div>;
           })}
         </div>
-      </div>
+      </div>}
+      {display === "agenda" && <div className="release-agenda">
+        {monthReleases.map((item) => (
+          <button key={item.id} onClick={() => setSelected(item)}>
+            <span className="agenda-date"><strong>{monthData.short} {item.day}</strong><small>{item.time}</small></span>
+            <span className="agenda-detail"><strong>{item.title}</strong><small>{item.service} · {item.id} · {item.environment}</small></span>
+            <span className="agenda-status"><StatusPill value={item.risk} /><StatusPill value={item.status} /></span>
+            <b aria-hidden="true">→</b>
+          </button>
+        ))}
+        {monthReleases.length === 0 && <div className="empty-state"><strong>No production releases in this month.</strong><span>Select another month to review the trailing twelve-month record.</span></div>}
+      </div>}
       {selected && <ReleaseDrawer item={selected} onClose={() => setSelected(null)} />}
     </section>
   );
@@ -561,20 +849,34 @@ function ReleaseCalendar({ requestedId }: { requestedId?: string }) {
 
 function ReleaseDrawer({ item, onClose }: { item: Release; onClose: () => void }) {
   const releaseMonth = monthMeta.find((month) => month.key === item.month) || monthMeta[0];
+  const dialogRef = useModalDialog(onClose);
+  const titleId = `release-drawer-${item.id}`;
   return (
     <div className="drawer-backdrop" onClick={onClose} role="presentation">
-      <aside className="record-drawer release-drawer" onClick={(event) => event.stopPropagation()} aria-label={`${item.id} release details`}>
-        <div className="drawer-top"><div><span className="eyebrow">Production change</span><h2>{item.id}</h2></div><button className="close-button" onClick={onClose} aria-label="Close details">×</button></div>
+      <aside ref={dialogRef} className="record-drawer release-drawer" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>
+        <div className="drawer-top"><div><span className="eyebrow">Production change</span><h2 id={titleId}>{item.id}</h2></div><button data-dialog-close className="close-button" onClick={onClose} aria-label="Close details">×</button></div>
         <h3>{item.title}</h3>
         <div className="drawer-status"><StatusPill value={item.status} /><StatusPill value={item.risk} /><StatusPill value={item.type} /></div>
         <div className="release-time-card"><span>Deployment window</span><strong>{releaseMonth.short} {item.day}, {releaseMonth.year}</strong><small>{item.window}</small></div>
         <p className="release-summary">{item.summary}</p>
         <dl className="detail-list"><div><dt>Business service</dt><dd>{item.service}</dd></div><div><dt>Change owner</dt><dd>{item.owner}</dd></div><div><dt>Environment</dt><dd>{item.environment}</dd></div><div><dt>Change type</dt><dd>{item.type}</dd></div></dl>
         <div className="drawer-section conditions"><span>Closure & validation conditions</span>{item.conditions.map((condition) => <div key={condition}><i>✓</i><p>{condition}</p></div>)}</div>
-        <div className="drawer-actions"><button className="secondary-action" onClick={onClose}>Back to calendar</button><button className="primary-action">Open change ↗</button></div>
+        <div className="drawer-actions"><button className="secondary-action" onClick={onClose}>Back to calendar</button><button className="demo-action" disabled>Change link unavailable in demo</button></div>
       </aside>
     </div>
   );
+}
+
+function readRouteState() {
+  const params = new URLSearchParams(window.location.search);
+  const requestedView = params.get("view") as View | null;
+  const view = requestedView && navItems.some((item) => item.id === requestedView) ? requestedView : "overview";
+  const filter: FilterState = {};
+  (["status", "outcome", "priority", "service", "search", "releaseId"] as const).forEach((key) => {
+    const value = params.get(key);
+    if (value) filter[key] = value;
+  });
+  return { view, filter };
 }
 
 export default function Home() {
@@ -584,10 +886,25 @@ export default function Home() {
 
   const activeLabel = useMemo(() => navItems.find((item) => item.id === view)?.label || "Portfolio overview", [view]);
 
+  useEffect(() => {
+    const applyRoute = () => {
+      const route = readRouteState();
+      setView(route.view);
+      setFilter(route.filter);
+    };
+    applyRoute();
+    window.addEventListener("popstate", applyRoute);
+    return () => window.removeEventListener("popstate", applyRoute);
+  }, []);
+
   function openDetail(nextView: View, nextFilter: FilterState = {}) {
     setFilter(nextFilter);
     setView(nextView);
-    window.history.replaceState(null, "", nextView === "overview" ? "/" : `/?view=${nextView}`);
+    const params = new URLSearchParams();
+    if (nextView !== "overview") params.set("view", nextView);
+    Object.entries(nextFilter).forEach(([key, value]) => { if (value) params.set(key, value); });
+    const nextUrl = params.size > 0 ? `/?${params.toString()}` : "/";
+    window.history.pushState(null, "", nextUrl);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -597,21 +914,22 @@ export default function Home() {
         <div className="brand"><div className="brand-mark">F</div><div><strong>Fischer</strong><span>Product Lab</span></div></div>
         <div className="product-chip"><span>Current product</span><strong>Portfolio Health</strong></div>
         <nav aria-label="Primary navigation">{navItems.map((item) => <button key={item.id} className={view === item.id ? "active" : ""} onClick={() => openDetail(item.id)}><span className={`nav-glyph glyph-${item.id}`} />{item.label}</button>)}</nav>
-        <div className="sidebar-footer"><div><span className="live-dot" /><div><strong>ServiceNow connected</strong><small>Fictional live feed</small></div></div><button aria-label="Feed settings">•••</button></div>
+        <div className="sidebar-footer"><div><span className="live-dot" /><div><strong>Simulated ServiceNow feed</strong><small>Synthetic snapshot · no live connection</small></div></div><span className="demo-badge">DEMO</span></div>
       </aside>
       <div className="main-column">
         <header className="topbar">
           <div className="mobile-brand"><div className="brand-mark">F</div><div><span>Fischer Product Lab</span><strong>{activeLabel}</strong></div></div>
-          <nav className="mobile-nav">{navItems.map((item) => <button key={item.id} className={view === item.id ? "active" : ""} onClick={() => openDetail(item.id)}>{item.short}</button>)}</nav>
+          <nav className="mobile-nav" aria-label="Mobile navigation">{navItems.map((item) => <button key={item.id} className={view === item.id ? "active" : ""} onClick={() => openDetail(item.id)}>{item.short}</button>)}</nav>
           <div className="topbar-context"><span>Fischer Product Lab</span><b>/</b><span>Portfolio Health</span><b>/</b><strong>{activeLabel}</strong></div>
-          <div className="topbar-actions"><button className="sync-button" onClick={() => { setLastSync("just now"); window.setTimeout(() => setLastSync("1 min ago"), 60000); }}><span className="sync-icon">↻</span><span><b>Live feed</b><small>Synced {lastSync}</small></span></button><button className="avatar" aria-label="User profile">TF</button></div>
+          <div className="topbar-actions"><button className="sync-button" aria-label="Refresh synthetic demo snapshot" onClick={() => { setLastSync("just now"); window.setTimeout(() => setLastSync("1 min ago"), 60000); }}><span className="sync-icon">↻</span><span><b>Demo snapshot</b><small>Refreshed {lastSync}</small></span></button><span className="avatar" role="img" aria-label="Trevor Fischer demo profile">TF</span></div>
         </header>
         <main>
           {view === "overview" && <Overview openDetail={openDetail} />}
+          {view === "services" && <ServicePortfolio openDetail={openDetail} />}
           {view === "incidents" && <DetailTable key={`incidents-${JSON.stringify(filter)}`} view="incidents" initialFilter={filter} />}
           {view === "problems" && <DetailTable key={`problems-${JSON.stringify(filter)}`} view="problems" initialFilter={filter} />}
           {view === "changes" && <DetailTable key={`changes-${JSON.stringify(filter)}`} view="changes" initialFilter={filter} />}
-          {view === "releases" && <ReleaseCalendar key={filter.status || "calendar"} requestedId={filter.status} />}
+          {view === "releases" && <ReleaseCalendar key={filter.releaseId || "calendar"} requestedId={filter.releaseId} />}
         </main>
       </div>
     </div>

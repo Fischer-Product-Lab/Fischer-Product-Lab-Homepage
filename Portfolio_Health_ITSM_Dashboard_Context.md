@@ -81,6 +81,8 @@ The landing view contains:
 - Portfolio health score and simulated ServiceNow feed status
 - Leadership watchlist
 - Incident, problem, and change KPI cards
+- Service-health preview organized by business service and accountable owner
+- Expandable five-dimension Portfolio Health scoring methodology
 - Twelve-month mini-trends for opened versus closed records
 - Interactive six-month/twelve-month operational-flow charts
 - Change execution-quality analysis
@@ -159,6 +161,7 @@ It includes:
 - Awaiting-approval count
 - Low, moderate, and high-risk event styling
 - Release detail drawers
+- Calendar/agenda display toggle for desktop and mobile use
 
 Release detail includes:
 
@@ -173,6 +176,37 @@ Release detail includes:
 - Closure and validation conditions
 
 All release records are fictional.
+
+### 5.6 Service Health Scorecards
+
+The product now includes a dedicated Service Health view organized around portfolio accountability rather than ServiceNow modules.
+
+Each service scorecard includes:
+
+- Weighted health score and status
+- Availability, incident volume, P1 exposure, MTTR, and SLA attainment
+- Open problem and overdue-RCA debt
+- Change success rate
+- Next release and release risk
+- Named accountable owner
+- A concrete leadership action or decision
+
+The overview includes a compact service-health preview, while the full view compares six representative business services and links directly into filtered incident, problem, and change evidence.
+
+### 5.7 Linked Record Lineage
+
+The Service Health view includes causal lineage connecting:
+
+`Incident -> Problem -> Permanent-fix change -> Release`
+
+Each lineage identifies the business impact, accountable owner, due date, current state, and decision or exit criterion. Selecting an incident, problem, or change opens the corresponding record table with a shareable search filter. Selecting a release opens the matching calendar record and detail drawer.
+
+### 5.8 Interaction Integrity and Accessibility
+
+- View and filter state are encoded in the URL and restored on initial load or browser navigation.
+- Record and release drawers use modal-dialog semantics, Escape-to-close, contained keyboard focus, and focus restoration.
+- Controls that would require a real ServiceNow connection are disabled and explicitly identified as unavailable in demo mode.
+- Feed language consistently describes a simulated, synthetic snapshot rather than a production connection.
 
 ## 6. Fictional Data Model
 
@@ -328,63 +362,56 @@ The product has passed:
 - Starter-asset removal assertions
 - Metadata and share-image checks
 - Responsive CSS presence checks
+- ESLint with no warnings or errors
+- TypeScript validation, including local Cloudflare binding declarations
 
 Current deployment is private and uses the existing Sites URL:
 
 https://portfolio-health-itsm.t-fischer2.chatgpt.site
 
-The repository history contains three principal product milestones:
+The repository history contains four principal product milestones:
 
 1. Initial ITSM dashboard build
 2. Fischer Product Lab/VulnBoard visual alignment
 3. Expanded data, twelve-month trends, and trailing twelve-month release calendar
+4. Service-health intelligence, linked record lineage, metric transparency, deep links, accessible drawers, and mobile agenda support
 
 ## 11. Known Limitations
 
 - The ServiceNow feed is simulated.
 - Headline totals and representative table rows are maintained separately.
 - Charts do not yet provide hover tooltips or selectable data points.
-- The `view` query parameter is written to the URL but is not yet read on initial page load.
 - Tables do not yet support sorting, pagination, saved filters, or export.
-- Record drawers show product context but not true linked-record lineage.
 - Release conflict and blackout-window detection are not implemented.
-- Portfolio health score calculation is currently illustrative rather than formula-driven.
-- No service-level scorecard view exists yet.
+- Service-health and lineage relationships are representative synthetic aggregates rather than calculated from a production CMDB or ServiceNow relationship graph.
+- The five-dimension Portfolio Health formula is transparent but remains an illustrative weighting model that requires organizational calibration.
 - No automated leadership narrative is generated yet.
 
 ## 12. Recommended Roadmap
 
 ### Highest-value next iteration
 
-1. **Service health scorecards**
-   - Availability
-   - Incident rate
-   - MTTR
-   - SLA compliance
-   - Open problem and RCA debt
-   - Change success rate
-   - Release risk
-   - Named owner
+1. **Release intelligence**
+   - Collision and shared-dependency detection
+   - Blackout and change-freeze windows
+   - Approval and validation-evidence completeness
+   - Concentrated risk by service and owner
 
-2. **Linked record lineage**
-   - Incident caused by change
-   - Incident linked to problem
-   - Problem linked to permanent-resolution change
-   - Change linked to release
-   - Business service and dependency context
-
-Together, these features would move the product from operational reporting toward a true portfolio decision system.
+2. **Leadership narrative and decision register**
+   - What changed and why it matters
+   - Decisions required, accountable owner, and due date
+   - Commitments approaching or missing target
+   - Exportable weekly portfolio brief
 
 ### Subsequent improvements
 
 3. Target and threshold overlays on charts
-4. Release collision, blackout, and dependency warnings
-5. Portfolio-level service heatmap
-6. Sorting, pagination, export, and saved filter views
-7. Data-quality and feed-freshness monitoring
-8. Weekly leadership narrative and decision brief
-9. Real ServiceNow server-side integration
-10. Role-based access and audit controls if write workflows are ever added
+4. Portfolio-level service heatmap
+5. Sorting, pagination, export, and saved filter views
+6. Data-quality and feed-freshness monitoring
+7. Canonical synthetic event model that calculates both aggregate metrics and representative records
+8. Real ServiceNow server-side integration
+9. Role-based access and audit controls if write workflows are ever added
 
 ## 13. Product Principles for Future Changes
 
@@ -412,9 +439,9 @@ Maintain these rules:
 ```text
 Read Portfolio_Health_ITSM_Dashboard_Context.md before making changes.
 
-Continue building Portfolio Health as a Fischer Product Lab product. Preserve the VulnBoard navy, ivory, warm-paper, and gold visual system; the synthetic-data and read-only boundaries; and all existing incident, problem, change, table-filter, line-chart, drawer, and trailing twelve-month release-calendar behavior.
+Continue building Portfolio Health as a Fischer Product Lab product. Preserve the VulnBoard navy, ivory, warm-paper, and gold visual system; the synthetic-data and read-only boundaries; and all existing service-health, linked-lineage, metric-methodology, incident, problem, change, deep-link, accessible-drawer, line-chart, and trailing twelve-month release-calendar behavior.
 
-The next recommended product increment is service health scorecards plus linked incident/problem/change/release lineage. Inspect app/page.tsx and app/globals.css, implement the increment, validate the production build, and update the existing private Sites deployment.
+The next recommended product increment is release collision/blackout intelligence plus an exportable weekly leadership narrative and decision register. Inspect app/page.tsx and app/globals.css, implement the increment, validate the production build, update this context file, and update the existing private Sites deployment.
 ```
 
 ## 15. Reference Material
