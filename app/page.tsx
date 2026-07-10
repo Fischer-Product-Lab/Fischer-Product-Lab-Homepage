@@ -404,15 +404,16 @@ export default function Home() {
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <div className="brand"><div className="brand-mark">PH</div><div><strong>Portfolio Health</strong><span>IT service operations</span></div></div>
+        <div className="brand"><div className="brand-mark">F</div><div><strong>Fischer</strong><span>Product Lab</span></div></div>
+        <div className="product-chip"><span>Current product</span><strong>Portfolio Health</strong></div>
         <nav aria-label="Primary navigation">{navItems.map((item) => <button key={item.id} className={view === item.id ? "active" : ""} onClick={() => openDetail(item.id)}><span className={`nav-glyph glyph-${item.id}`} />{item.label}</button>)}</nav>
         <div className="sidebar-footer"><div><span className="live-dot" /><div><strong>ServiceNow connected</strong><small>Fictional live feed</small></div></div><button aria-label="Feed settings">•••</button></div>
       </aside>
       <div className="main-column">
         <header className="topbar">
-          <div className="mobile-brand"><div className="brand-mark">PH</div><strong>{activeLabel}</strong></div>
+          <div className="mobile-brand"><div className="brand-mark">F</div><div><span>Fischer Product Lab</span><strong>{activeLabel}</strong></div></div>
           <nav className="mobile-nav">{navItems.map((item) => <button key={item.id} className={view === item.id ? "active" : ""} onClick={() => openDetail(item.id)}>{item.short}</button>)}</nav>
-          <div className="topbar-context"><span>Enterprise Platforms</span><b>/</b><strong>{activeLabel}</strong></div>
+          <div className="topbar-context"><span>Fischer Product Lab</span><b>/</b><span>Portfolio Health</span><b>/</b><strong>{activeLabel}</strong></div>
           <div className="topbar-actions"><button className="sync-button" onClick={() => { setLastSync("just now"); window.setTimeout(() => setLastSync("1 min ago"), 60000); }}><span className="sync-icon">↻</span><span><b>Live feed</b><small>Synced {lastSync}</small></span></button><button className="avatar" aria-label="User profile">TF</button></div>
         </header>
         <main>

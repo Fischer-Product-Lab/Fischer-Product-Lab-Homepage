@@ -9,17 +9,17 @@ export async function generateMetadata(): Promise<Metadata> {
   const origin = `${protocol}://${host}`;
 
   return {
-    title: "Portfolio Health | IT Service Operations",
-    description: "A decision-ready ITSM dashboard for incidents, problems, changes, and releases.",
+    title: "Portfolio Health | Fischer Product Lab",
+    description: "A decision-ready ITSM operating dashboard from Fischer Product Lab.",
     openGraph: {
       title: "Portfolio Health",
-      description: "Operational health, in one decision-ready view.",
+      description: "Fischer Product Lab presents operational health in one decision-ready view.",
       images: [`${origin}/og.png`],
     },
     twitter: {
       card: "summary_large_image",
       title: "Portfolio Health",
-      description: "Operational health, in one decision-ready view.",
+      description: "Fischer Product Lab presents operational health in one decision-ready view.",
       images: [`${origin}/og.png`],
     },
   };

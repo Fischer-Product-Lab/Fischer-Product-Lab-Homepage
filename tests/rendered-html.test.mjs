@@ -22,7 +22,7 @@ test("server-renders the Portfolio Health product surface", async () => {
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
-  assert.match(html, /<title>Portfolio Health \| IT Service Operations<\/title>/i);
+  assert.match(html, /<title>Portfolio Health \| Fischer Product Lab<\/title>/i);
   assert.match(html, /Operational health, in one decision-ready view\./);
   assert.match(html, /Incidents/);
   assert.match(html, /Problems/);
@@ -47,6 +47,8 @@ test("ships the finished product metadata and removes starter assets", async () 
   assert.match(layout, /\/og\.png/);
   assert.match(css, /@media \(max-width: 820px\)/);
   assert.match(css, /prefers-reduced-motion/);
+  assert.match(css, /Fischer Product Lab \/ VulnBoard visual system/);
+  assert.match(css, /--gold-soft:\s*#d7b56d/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
   await access(new URL("../public/og.png", import.meta.url));
   await assert.rejects(access(new URL("../app/_sites-preview/SkeletonPreview.tsx", root)));
