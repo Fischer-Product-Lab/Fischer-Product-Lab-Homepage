@@ -6,6 +6,7 @@ import { products, type Product, type ProductId } from "./products";
 const metrics: Record<ProductId, readonly [string, string, string, string]> = {
   productpulse: ["WAU", "5,230", "Activation", "64.0%"],
   vulnboard: ["Risk score", "68", "SLA debt", "87 overdue"],
+  portfoliohealth: ["Health", "69", "SLA risk", "8"],
   trustdesk: ["Open", "7", "Automation", "51%"],
   agentops: ["Agents", "8", "Launch ready", "3"],
 };
@@ -83,14 +84,30 @@ function Monument({ product }: { product: Product }) {
     );
   }
 
-  return (
-    <div className="monument control-tower" aria-hidden="true">
-      <i className="signal signal-a" /><i className="signal signal-b" />
-      <div className="tower-crown"><span /><span /><span /></div>
-      <div className="tower-body"><InterfaceFragment product={product} /></div>
-      <div className="tower-wing left" /><div className="tower-wing right" />
-    </div>
-  );
+  if (product.id === "portfoliohealth") {
+    return (
+      <div className="monument rotunda" aria-hidden="true">
+        <div className="rotunda-dome"><i /><i /><i /></div>
+        <div className="rotunda-columns">{Array.from({ length: 6 }, (_, i) => <i key={i} />)}</div>
+        <InterfaceFragment product={product} />
+        <span className="rotunda-base" />
+      </div>
+    );
+  }
+
+  if (product.id === "agentops") {
+    return (
+      <div className="monument control-tower" aria-hidden="true">
+        <i className="signal signal-a" /><i className="signal signal-b" />
+        <div className="tower-crown"><span /><span /><span /></div>
+        <div className="tower-body"><InterfaceFragment product={product} /></div>
+        <div className="tower-wing left" /><div className="tower-wing right" />
+      </div>
+    );
+  }
+
+  const exhaustiveProduct: never = product;
+  return exhaustiveProduct;
 }
 
 function Landmark({
@@ -237,7 +254,7 @@ export default function Home() {
           <p>Independent products for clearer decisions, stronger trust, and better-operated systems.</p>
           <a className="text-link" href="#paths">Choose a path <span aria-hidden="true">↓</span></a>
         </div>
-        <div className="landscape" role="group" aria-label="Four product landmarks">
+        <div className="landscape" role="group" aria-label="Five product landmarks">
           {products.map((product) => (
             <Landmark
               key={product.id}
@@ -257,7 +274,7 @@ export default function Home() {
       <section className="paths section-shell" id="paths" aria-labelledby="paths-title">
         <div className="section-heading">
           <SectionMark number="02">Choose a path</SectionMark>
-          <h2 id="paths-title">Four questions.<br />Four working answers.</h2>
+          <h2 id="paths-title">Five questions.<br />Five working answers.</h2>
           <p>Each route leads to a live product. The landscape remains; the instruments come into focus.</p>
         </div>
         <div className="path-list">
@@ -281,7 +298,7 @@ export default function Home() {
         <div className="lab-copy">
           <SectionMark number="03">Inside the lab</SectionMark>
           <h2 id="lab-title">The work begins<br />with a useful question.</h2>
-          <p>What signal is missing? Where does trust slow down? Which risk needs an owner? What should be ready before launch?</p>
+          <p>What signal is missing? Where does service health begin to drift? Where does trust slow down? Which risk needs an owner? What should be ready before launch?</p>
           <p>Each product begins as a question. The lab is where we build the answer.</p>
         </div>
         <p className="lab-note">Some paths lead to finished products. Others remain experiments. All of them move the work forward.</p>

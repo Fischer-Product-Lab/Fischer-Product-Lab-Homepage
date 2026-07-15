@@ -28,6 +28,20 @@ export const products = [
     coordinate: "17.8 / R",
   },
   {
+    id: "portfoliohealth",
+    name: "Portfolio Health",
+    eyebrow: "ITSM Portfolio Intelligence",
+    tagline:
+      "Track service disruption, root-cause progress, change execution, and release risk in one decision-ready view.",
+    status: "Live",
+    url: "https://portfolio-health-fpl.vercel.app/",
+    landmark: "The Confluence Rotunda",
+    inspiration: "Abstracted civic rotunda and converging waterways",
+    accent: "patina green and soft gold",
+    routeLabel: "Survey the portfolio",
+    coordinate: "72.6 / H",
+  },
+  {
     id: "trustdesk",
     name: "TrustDesk",
     eyebrow: "Customer Trust Operations",

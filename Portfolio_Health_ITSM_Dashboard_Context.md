@@ -3,9 +3,9 @@
 **Owner:** Trevor Fischer  
 **Product family:** Fischer Product Lab  
 **Product:** Portfolio Health  
-**Status:** Built, validated, and privately deployed  
+**Status:** Built, validated, and publicly deployed
 **Last updated:** July 2026  
-**Private site:** https://portfolio-health-itsm.t-fischer2.chatgpt.site
+**Public site:** https://portfolio-health-fpl.vercel.app/
 
 ## 1. Purpose of This File
 
@@ -365,9 +365,9 @@ The product has passed:
 - ESLint with no warnings or errors
 - TypeScript validation, including local Cloudflare binding declarations
 
-Current deployment is private and uses the existing Sites URL:
+Current deployment is public on Vercel:
 
-https://portfolio-health-itsm.t-fischer2.chatgpt.site
+https://portfolio-health-fpl.vercel.app/
 
 The repository history contains four principal product milestones:
 
@@ -441,7 +441,7 @@ Read Portfolio_Health_ITSM_Dashboard_Context.md before making changes.
 
 Continue building Portfolio Health as a Fischer Product Lab product. Preserve the VulnBoard navy, ivory, warm-paper, and gold visual system; the synthetic-data and read-only boundaries; and all existing service-health, linked-lineage, metric-methodology, incident, problem, change, deep-link, accessible-drawer, line-chart, and trailing twelve-month release-calendar behavior.
 
-The next recommended product increment is release collision/blackout intelligence plus an exportable weekly leadership narrative and decision register. Inspect app/page.tsx and app/globals.css, implement the increment, validate the production build, update this context file, and update the existing private Sites deployment.
+The next recommended product increment is release collision/blackout intelligence plus an exportable weekly leadership narrative and decision register. Inspect the Portfolio Health source, implement the increment, validate the production build, update this context file, and update the existing public Vercel deployment.
 ```
 
 ## 15. Reference Material

@@ -31,9 +31,11 @@ test("server-renders the complete Fischer Product Lab journey", async () => {
   assert.match(html, /The builder/i);
   assert.match(html, /What should/i);
   assert.match(html, /Product index/i);
+  assert.match(html, /Portfolio Health/i);
+  assert.match(html, /The Confluence Rotunda/i);
 });
 
-test("ships all four truthful product destinations and accessibility fallbacks", async () => {
+test("ships all five truthful product destinations and accessibility fallbacks", async () => {
   const [page, layout, css, products] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
@@ -43,17 +45,22 @@ test("ships all four truthful product destinations and accessibility fallbacks",
 
   assert.match(products, /https:\/\/productpulse-fpl\.vercel\.app\//);
   assert.match(products, /https:\/\/vuln-board-fpl\.vercel\.app\/dashboard/);
+  assert.match(products, /https:\/\/portfolio-health-fpl\.vercel\.app\//);
   assert.match(products, /https:\/\/trustdesk-fpl\.vercel\.app\//);
   assert.match(products, /https:\/\/agentops-fpl\.vercel\.app\//);
   assert.match(products, /as const/);
   assert.match(page, /sessionStorage/);
   assert.match(page, /prefers-reduced-motion/);
   assert.match(page, /aria-label="Product index"/);
+  assert.match(page, /aria-label="Five product landmarks"/);
+  assert.match(page, /Five questions\./);
   assert.match(page, /<a[\s\S]*href=\{product\.url\}/);
+  assert.match(page, /rotunda/);
   assert.match(layout, /\/og\.png/);
   assert.match(css, /@media \(max-width:800px\)/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(css, /:focus-visible/);
+  assert.match(css, /\.rotunda-dome/);
   assert.doesNotMatch(page, /canvas|three|WebGL/i);
   await Promise.all([
     access(new URL("public/og.png", root)),
