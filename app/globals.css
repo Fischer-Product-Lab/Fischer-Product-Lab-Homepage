@@ -303,7 +303,7 @@ button { font: inherit; }
 .fog-middle { z-index: -3; top: 56%; height: 28%; opacity: .32; animation-direction: alternate-reverse; animation-duration: 24s; }
 .fog-front { z-index: 7; bottom: 7%; height: 24%; opacity: .28; animation-duration: 28s; }
 
-.hero-copy { position: absolute; z-index: 16; top: 14%; left: 4.5%; max-width: 520px; text-shadow: 0 2px 24px rgba(3,6,9,.9); }
+.hero-copy { position: absolute; z-index: 16; top: 14%; left: 4.5%; max-width: 520px; text-shadow: 0 2px 24px rgba(3,6,9,.9); transform: translateY(clamp(-58px, -5vh, -36px)); }
 .section-mark { display: flex; align-items: center; gap: 12px; margin: 0 0 22px; color: rgba(231,233,229,.52); font-size: 8px; font-weight: 700; letter-spacing: .19em; text-transform: uppercase; }
 .section-mark span { color: var(--gold-bright); }
 .section-mark::after { content: ""; width: 34px; border-top: 1px solid rgba(231,233,229,.26); }
@@ -461,7 +461,7 @@ button { font: inherit; }
   .product-index.compact{top:auto;left:0;right:0;bottom:0;width:100%;display:block;padding:10px 14px 12px;background:rgba(5,8,12,.94);border-top:1px solid var(--line);backdrop-filter:blur(10px)}
   .product-index.compact .index-label{display:none}.product-index.compact .index-links{display:flex;justify-content:space-between;gap:6px}.product-index.compact .index-links a{display:grid;gap:3px;font-size:6px;text-align:center}.product-index.compact .index-links a span{font-size:5px}.product-index.compact .index-links a:hover,.product-index.compact .index-links a:focus-visible{transform:none}
   .threshold-copy h1{font-size:clamp(53px,18vw,80px)}.threshold-copy>p:first-child span{display:block;margin:8px 0 0}.threshold-intro{font-size:16px}.skip-intro{right:15px;bottom:76px}
-  .frontier{min-height:0;overflow:hidden}.hero-copy{position:relative;top:auto;left:auto;min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:110px 24px 120px}.hero-copy h1{font-size:clamp(62px,19vw,105px)}.hero-copy>p{font-size:18px}.sky-plane{height:100svh}.moon{top:14%;right:15%}
+  .frontier{min-height:0;overflow:hidden}.hero-copy{position:relative;top:auto;left:auto;min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:110px 24px 120px;transform:none}.hero-copy h1{font-size:clamp(62px,19vw,105px)}.hero-copy>p{font-size:18px}.sky-plane{height:100svh}.moon{top:14%;right:15%}
   .hero-atmosphere{inset:-2%;bottom:auto;height:104svh;transform:none}.hero-atmosphere::before{background:linear-gradient(90deg,rgba(3,6,10,.82),rgba(5,9,14,.42)),linear-gradient(180deg,rgba(3,6,10,.25),transparent 38%,rgba(3,6,9,.72) 100%)}.hero-atmosphere img{object-position:center 45%;filter:saturate(.68) contrast(1.08) brightness(.72)}.basin-light{height:62vh;bottom:auto}
   .ridge-far{opacity:.16}.ridge-mid{opacity:.25}
   .ridge-far{top:58vh;height:42vh}.ridge-mid{top:70vh;height:35vh}.ridge-front{display:none}.fog-back{top:62vh}.fog-middle{top:78vh}.fog-front{display:none}.contour-plane{top:60vh;height:40vh}
