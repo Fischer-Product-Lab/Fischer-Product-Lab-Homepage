@@ -59,6 +59,11 @@ test("ships all five truthful product destinations and accessibility fallbacks",
   assert.match(layout, /\/og\.png/);
   assert.match(css, /@media \(max-width:800px\)/);
   assert.match(css, /@media \(min-width:801px\)[\s\S]*?\.landscape\{z-index:9\}/);
+  assert.match(css, /\.landmark-vulnboard \.annotation\{left:165%;bottom:72px\}/);
+  assert.match(css, /\.landmark-portfoliohealth \.annotation\{left:125%\}/);
+  assert.match(css, /\.landmark-agentops \.annotation\{left:40%\}/);
+  assert.match(css, /\.annotation h3\{[^}]*font-size:clamp\(18px,1\.2vw,20px\)/);
+  assert.match(css, /\.annotation > span:not\(\.annotation-meta\)\{[^}]*font-size:clamp\(10px,\.7vw,11px\)/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(css, /:focus-visible/);
   assert.match(css, /\.ridge \{[^}]*pointer-events: none/);

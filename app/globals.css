@@ -450,10 +450,10 @@ button { font: inherit; }
   transform:scaleY(.34);
 }
 
-.annotation { position: absolute; z-index: 20; left: 50%; bottom: 195px; width: clamp(185px, 15vw, 220px); padding: 13px 0 0; border-top: 1px solid var(--accent); color: var(--fog); opacity: 0; pointer-events: none; transform: translate(-50%, 12px); text-shadow: 0 2px 14px var(--ink); transition: opacity 300ms ease, transform 400ms cubic-bezier(.2,.8,.2,1); }
-.landmark-productpulse .annotation { left: 108%; bottom: -12px; width: 205px; }
-.annotation-meta { display:flex; justify-content:space-between; color:rgba(231,233,229,.5); font-size:6px; letter-spacing:.14em; text-transform:uppercase; }.annotation-meta b{color:var(--accent)}
-.annotation p { margin:8px 0 3px; color:var(--accent); font-size:6px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }.annotation h3{margin:0;font-family:var(--serif);font-size:17px;font-weight:400}.annotation > span:not(.annotation-meta){display:block;margin-top:8px;color:rgba(231,233,229,.7);font-family:var(--serif);font-size:9px;line-height:1.45}.annotation a{display:inline-block;margin-top:10px;color:var(--fog);font-size:7px;font-weight:700;letter-spacing:.14em;text-decoration:none;text-transform:uppercase;pointer-events:auto}.annotation a i{color:var(--accent);font-style:normal}
+.annotation { position: absolute; z-index: 20; left: 50%; bottom: 195px; width: clamp(200px, 16vw, 240px); padding: 14px 10px 10px; border-top: 1px solid var(--accent); color: var(--fog); background: linear-gradient(135deg, rgba(3,6,9,.72), rgba(3,6,9,.24) 78%, transparent); box-shadow: 0 8px 28px rgba(3,6,9,.2); opacity: 0; pointer-events: none; transform: translate(-50%, 12px); text-shadow: 0 2px 16px var(--ink); transition: opacity 300ms ease, transform 400ms cubic-bezier(.2,.8,.2,1); }
+.landmark-productpulse .annotation { left: 108%; bottom: -12px; width: 215px; }
+.annotation-meta { display:flex; justify-content:space-between; color:rgba(231,233,229,.5); font-size:7px; line-height:1.2; letter-spacing:.14em; text-transform:uppercase; }.annotation-meta b{color:var(--accent)}
+.annotation p { margin:8px 0 3px; color:var(--accent); font-size:7px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }.annotation h3{margin:0;font-family:var(--serif);font-size:clamp(18px,1.2vw,20px);font-weight:400;line-height:1.08}.annotation > span:not(.annotation-meta){display:block;margin-top:8px;color:rgba(231,233,229,.76);font-family:var(--serif);font-size:clamp(10px,.7vw,11px);line-height:1.5}.annotation a{display:inline-block;margin-top:10px;color:var(--fog);font-size:8px;font-weight:700;letter-spacing:.14em;text-decoration:none;text-transform:uppercase;pointer-events:auto}.annotation a i{color:var(--accent);font-style:normal}
 .landmark.is-active { z-index: 8; }
 .landmark.is-active .annotation,
 .landmark:focus-within .annotation { opacity: 1; pointer-events: auto; transform: translate(-50%,0); }
@@ -536,6 +536,13 @@ button { font: inherit; }
 
 @media (min-width:801px) {
   .landscape{z-index:9}
+  .landmark-vulnboard .annotation{left:165%;bottom:72px}
+  .landmark-portfoliohealth .annotation{left:125%}
+  .landmark-agentops .annotation{left:40%}
+}
+
+@media (min-width:801px) and (max-width:1100px) {
+  .landmark-portfoliohealth .annotation{left:200%}
 }
 
 @media (max-width:1100px) {
@@ -561,7 +568,7 @@ button { font: inherit; }
   .landmark::before{content:"";position:absolute;inset:10% 0 0;background:radial-gradient(ellipse at 50% 70%,rgba(161,177,180,.23),transparent 56%);filter:blur(12px)}
   .landmark-link{inset:0 0 195px}.landmark-link .monument{bottom:85px;transform:translateX(-50%) scale(1.1)}.landmark.is-active .monument,.landmark:focus-within .monument{transform:translateX(-50%) translateY(-4px) scale(1.15)}
   .route{bottom:-115px;height:205px!important;transform:rotate(0)!important}.landmark-name{bottom:51px;font-size:8px}
-  .annotation,.landmark-productpulse .annotation{left:24px;right:24px;bottom:38px;width:auto;opacity:1;transform:none!important;pointer-events:auto}.annotation h3{font-size:23px}.annotation>span:not(.annotation-meta){font-size:12px}.annotation a{font-size:8px}
+  .annotation,.landmark-productpulse .annotation{left:24px;right:24px;bottom:38px;width:auto;background:none;box-shadow:none;opacity:1;transform:none!important;pointer-events:auto}.annotation h3{font-size:23px}.annotation>span:not(.annotation-meta){font-size:12px}.annotation a{font-size:8px}
   .frontier-instruction{display:none}
   .section-shell{padding:100px 24px}.section-heading,.compact-heading{display:block}.section-heading .section-mark{margin-top:0}.section-heading h2{font-size:clamp(50px,14vw,76px)}.section-heading>p{margin-top:28px}
   .path-list{margin-top:65px}.path-row{min-height:430px;display:grid;grid-template-columns:35px 1fr;gap:8px 20px;padding:32px 0}.path-row:hover,.path-row:focus-visible{padding:32px 8px}.path-number{grid-row:1 / span 3}.path-monument{height:150px}.path-copy{grid-column:2}.path-copy strong{font-size:38px}.path-copy>span{font-size:15px}.path-action{grid-column:2;align-items:flex-start;margin-top:18px}.path-monument .monument{transform:translateX(-50%) scale(.83)}
