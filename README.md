@@ -1,6 +1,6 @@
 # Fischer Product Lab
 
-A cinematic, responsive landing page for the Fischer Product Lab product portfolio. It uses the existing vinext/Next.js project shape and deploys as a Cloudflare Worker-compatible site.
+A cinematic, responsive landing page for the Fischer Product Lab product portfolio. It preserves the existing vinext/Next.js project shape for Sites while providing a native Next.js build for Vercel.
 
 ## Run locally
 
@@ -9,7 +9,7 @@ npm install
 npm run dev
 ```
 
-Use `npm run build` for a production build and `npm test` for the rendered-page checks.
+Use `npm run build` for the Sites production build, `npm run build:vercel` for the Vercel production build, and `npm test` for the rendered-page checks.
 
 ## Content map
 
