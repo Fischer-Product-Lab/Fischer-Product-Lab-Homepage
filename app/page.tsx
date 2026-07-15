@@ -97,15 +97,23 @@ function Landmark({
   product,
   active,
   onActivate,
+  onDeactivate,
   onNavigate,
 }: {
   product: Product;
   active: boolean;
   onActivate: (id: ProductId) => void;
+  onDeactivate: () => void;
   onNavigate: (event: React.MouseEvent<HTMLAnchorElement>, product: Product) => void;
 }) {
   return (
-    <article className={`landmark landmark-${product.id}${active ? " is-active" : ""}`}>
+    <article
+      className={`landmark landmark-${product.id}${active ? " is-active" : ""}`}
+      onMouseLeave={onDeactivate}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) onDeactivate();
+      }}
+    >
       <a
         className="landmark-link"
         href={product.url}
@@ -236,6 +244,7 @@ export default function Home() {
               product={product}
               active={active === product.id}
               onActivate={setActive}
+              onDeactivate={() => setActive(null)}
               onNavigate={navigate}
             />
           ))}

@@ -314,6 +314,8 @@ button { font: inherit; }
 .text-link:focus-visible { color: var(--gold-bright); border-color: var(--gold-bright); outline: none; }
 
 .landscape { position: absolute; z-index: 2; inset: 0; transform: translate(calc(var(--px) * 3px), calc(var(--py) * 2px)); transition: transform 700ms cubic-bezier(.2,.8,.2,1); }
+.landscape:has(.landmark:hover),
+.landscape:has(.landmark:focus-within) { z-index: 12; }
 .landmark { position: absolute; z-index: 3; width: 18vw; min-width: 190px; height: 250px; transition: opacity 500ms ease, filter 500ms ease, transform 650ms cubic-bezier(.2,.8,.2,1); }
 .landmark-productpulse { left: 8%; top: 53%; --accent: var(--gold-bright); }
 .landmark-vulnboard { left: 34%; top: 59%; --accent: #d77955; }
@@ -370,7 +372,7 @@ button { font: inherit; }
 .annotation p { margin:8px 0 3px; color:var(--accent); font-size:6px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }.annotation h3{margin:0;font-family:var(--serif);font-size:17px;font-weight:400}.annotation > span:not(.annotation-meta){display:block;margin-top:8px;color:rgba(231,233,229,.7);font-family:var(--serif);font-size:9px;line-height:1.45}.annotation a{display:inline-block;margin-top:10px;color:var(--fog);font-size:7px;font-weight:700;letter-spacing:.14em;text-decoration:none;text-transform:uppercase;pointer-events:auto}.annotation a i{color:var(--accent);font-style:normal}
 .landmark.is-active { z-index: 8; }
 .landmark.is-active .annotation,
-.landmark:focus-within .annotation { opacity: 1; transform: translate(-50%,0); }
+.landmark:focus-within .annotation { opacity: 1; pointer-events: auto; transform: translate(-50%,0); }
 .landmark.is-active .monument,
 .landmark:focus-within .monument { filter: drop-shadow(0 0 17px color-mix(in srgb, var(--accent) 34%, transparent)); transform: translateX(-50%) translateY(-5px) scale(1.05); }
 .landmark.is-active .interface-fragment,
