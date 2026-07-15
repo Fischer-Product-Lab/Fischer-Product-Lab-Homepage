@@ -295,7 +295,7 @@ button { font: inherit; }
 .basin-light i:first-child { left:38%; top:54%; }.basin-light i:last-child { right:24%; top:38%; animation-delay:-2s; background:rgba(208,229,231,.9); box-shadow:0 0 24px 8px rgba(168,218,225,.2); }
 .moon { position: absolute; top: 16%; right: 19%; width: 42px; height: 42px; border-radius: 50%; background: #dce1df; box-shadow: 0 0 50px rgba(218,231,233,.32); opacity: .72; transform: translate(calc(var(--px) * -2px), calc(var(--py) * -2px)); }
 .contour-plane { position: absolute; z-index: -2; inset: 43% -10% 0; opacity: .12; background: repeating-radial-gradient(ellipse at 46% 110%, transparent 0 32px, rgba(231,233,229,.24) 33px 34px); transform: perspective(500px) rotateX(55deg) translate(calc(var(--px) * 3px), calc(var(--py) * 2px)); }
-.ridge { position: absolute; z-index: -7; left: -8%; right: -8%; clip-path: polygon(0 72%, 8% 47%, 16% 64%, 26% 31%, 36% 61%, 47% 38%, 55% 63%, 66% 28%, 75% 57%, 85% 35%, 94% 58%, 100% 42%, 100% 100%, 0 100%); }
+.ridge { position: absolute; z-index: -7; left: -8%; right: -8%; pointer-events: none; clip-path: polygon(0 72%, 8% 47%, 16% 64%, 26% 31%, 36% 61%, 47% 38%, 55% 63%, 66% 28%, 75% 57%, 85% 35%, 94% 58%, 100% 42%, 100% 100%, 0 100%); }
 .ridge-far { top: 35%; height: 32%; opacity: .22; background: #1d2c37; filter: blur(.5px); mix-blend-mode:multiply; transform: translate(calc(var(--px) * -2px), calc(var(--py) * -1px)); }
 .ridge-mid { z-index: -5; top: 48%; height: 32%; opacity: .38; background: #111c25; mix-blend-mode:multiply; clip-path: polygon(0 60%, 12% 35%, 23% 66%, 36% 40%, 48% 70%, 62% 32%, 75% 61%, 87% 41%, 100% 66%, 100% 100%, 0 100%); transform: translate(calc(var(--px) * -4px), calc(var(--py) * -2px)); }
 .ridge-front { z-index: 8; bottom: -1px; height: 28%; background: #05080b; clip-path: polygon(0 52%, 11% 35%, 20% 54%, 31% 27%, 41% 58%, 52% 46%, 61% 68%, 72% 34%, 82% 60%, 91% 39%, 100% 56%, 100% 100%, 0 100%); transform: translate(calc(var(--px) * -7px), calc(var(--py) * -3px)); }
@@ -532,6 +532,10 @@ button { font: inherit; }
 
 @media (pointer:fine) {
   .landmark-link,.primary-link,.threshold-copy button{cursor:crosshair}
+}
+
+@media (min-width:801px) {
+  .landscape{z-index:9}
 }
 
 @media (max-width:1100px) {

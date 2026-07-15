@@ -58,8 +58,10 @@ test("ships all five truthful product destinations and accessibility fallbacks",
   assert.match(page, /rotunda/);
   assert.match(layout, /\/og\.png/);
   assert.match(css, /@media \(max-width:800px\)/);
+  assert.match(css, /@media \(min-width:801px\)[\s\S]*?\.landscape\{z-index:9\}/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(css, /:focus-visible/);
+  assert.match(css, /\.ridge \{[^}]*pointer-events: none/);
   assert.match(css, /\.rotunda-dome/);
   assert.doesNotMatch(page, /canvas|three|WebGL/i);
   await Promise.all([
