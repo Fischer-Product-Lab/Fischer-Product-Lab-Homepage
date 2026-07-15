@@ -10,59 +10,50 @@ async function render() {
   const { default: worker } = await import(workerUrl.href);
 
   return worker.fetch(
-    new Request("http://localhost/", { headers: { accept: "text/html", host: "portfolio.test" } }),
+    new Request("http://localhost/", { headers: { accept: "text/html", host: "fpl.test" } }),
     { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
     { waitUntil() {}, passThroughOnException() {} },
   );
 }
 
-test("server-renders the Portfolio Health product surface", async () => {
+test("server-renders the complete Fischer Product Lab journey", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
-  assert.match(html, /<title>Portfolio Health \| Fischer Product Lab<\/title>/i);
-  assert.match(html, /Operational health, in one decision-ready view\./);
-  assert.match(html, /Incidents/);
-  assert.match(html, /Problems/);
-  assert.match(html, /Changes/);
-  assert.match(html, /Release calendar/);
-  assert.match(html, /Synthetic demo dataset/);
-  assert.match(html, /Service health/);
-  assert.match(html, /How Portfolio Health is calculated/);
-  assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
+  assert.match(html, /Fischer Product Lab \| Many paths\. One laboratory\./);
+  assert.match(html, /Independent products for clearer decisions/);
+  assert.match(html, /The frontier/i);
+  assert.match(html, /Choose a path/i);
+  assert.match(html, /Inside the lab/i);
+  assert.match(html, /Field notes/i);
+  assert.match(html, /The builder/i);
+  assert.match(html, /What should/i);
+  assert.match(html, /Product index/i);
 });
 
-test("ships the finished product metadata and removes starter assets", async () => {
-  const [page, layout, css, packageJson] = await Promise.all([
+test("ships all four truthful product destinations and accessibility fallbacks", async () => {
+  const [page, layout, css, products] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
-    readFile(new URL("../package.json", import.meta.url), "utf8"),
+    readFile(new URL("../app/products.ts", import.meta.url), "utf8"),
   ]);
 
-  assert.match(page, /ReleaseCalendar/);
-  assert.match(page, /TrendLineChart/);
-  assert.match(page, /Opened vs\. closed month over month/);
-  assert.match(page, /Array\.from\(\{ length: 12 \}/);
-  assert.match(page, /currentMonthKey - 11 \+ index/);
-  assert.match(page, /Trailing 12-month view/);
-  assert.match(page, /ServicePortfolio/);
-  assert.match(page, /Linked record lineage/);
-  assert.match(page, /useModalDialog/);
-  assert.match(page, /readRouteState/);
-  assert.match(page, /calendar-view-toggle/);
-  assert.match(page, /Business service/);
-  assert.match(page, /DetailTable/);
-  assert.match(page, /Closed with issues/);
-  assert.match(page, /Carried over/);
+  assert.match(products, /https:\/\/productpulse-fpl\.vercel\.app\//);
+  assert.match(products, /https:\/\/vuln-board-fpl\.vercel\.app\/dashboard/);
+  assert.match(products, /https:\/\/trustdesk-fpl\.vercel\.app\//);
+  assert.match(products, /https:\/\/agentops-fpl\.vercel\.app\//);
+  assert.match(products, /as const/);
+  assert.match(page, /sessionStorage/);
+  assert.match(page, /prefers-reduced-motion/);
+  assert.match(page, /aria-label="Product index"/);
+  assert.match(page, /<a[\s\S]*href=\{product\.url\}/);
   assert.match(layout, /\/og\.png/);
-  assert.match(css, /@media \(max-width: 820px\)/);
-  assert.match(css, /prefers-reduced-motion/);
-  assert.match(css, /Fischer Product Lab \/ VulnBoard visual system/);
-  assert.match(css, /--gold-soft:\s*#d7b56d/);
-  assert.doesNotMatch(packageJson, /react-loading-skeleton/);
-  await access(new URL("../public/og.png", import.meta.url));
-  await assert.rejects(access(new URL("../app/_sites-preview/SkeletonPreview.tsx", root)));
+  assert.match(css, /@media \(max-width:800px\)/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
+  assert.match(css, /:focus-visible/);
+  assert.doesNotMatch(page, /canvas|three|WebGL/i);
+  await access(new URL("public/og.png", root));
 });
