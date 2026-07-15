@@ -55,5 +55,9 @@ test("ships all four truthful product destinations and accessibility fallbacks",
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(css, /:focus-visible/);
   assert.doesNotMatch(page, /canvas|three|WebGL/i);
-  await access(new URL("public/og.png", root));
+  await Promise.all([
+    access(new URL("public/og.png", root)),
+    access(new URL("public/landscape-hero.webp", root)),
+    access(new URL("public/landscape-hero-mobile.webp", root)),
+  ]);
 });

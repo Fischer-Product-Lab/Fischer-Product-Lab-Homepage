@@ -206,6 +206,18 @@ export default function Home() {
         onMouseMove={moveLandscape}
       >
         <div className="sky-plane"><span className="moon" /></div>
+        <picture className="hero-atmosphere">
+          <source media="(max-width: 800px)" srcSet="/landscape-hero-mobile.webp" />
+          <img
+            src="/landscape-hero.webp"
+            alt=""
+            width={1672}
+            height={941}
+            decoding="async"
+            fetchPriority="high"
+          />
+        </picture>
+        <div className="basin-light" aria-hidden="true"><i /><i /></div>
         <div className="contour-plane" aria-hidden="true" />
         <div className="ridge ridge-far" aria-hidden="true" />
         <div className="fog fog-back" aria-hidden="true" />

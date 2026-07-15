@@ -16,7 +16,7 @@ Use `npm run build` for a production build and `npm test` for the rendered-page 
 - `app/products.ts` is the typed source of truth for product names, descriptions, statuses, accents, landmarks, and live destinations. Add or replace products there first.
 - `app/page.tsx` contains the reusable landmark, monument, annotation, product-index, interface-fragment, and section components. Truthful interface metrics sampled from each live demo are grouped in the `metrics` map near the top.
 - `app/globals.css` contains the landscape, monument drawing, motion states, desktop-to-mobile recomposition, focus treatments, and reduced-motion fallback.
-- `public/og.png` is the social preview card.
+- `public/og.png` is the social preview card. `public/landscape-hero.webp` and `public/landscape-hero-mobile.webp` are the responsive cinematic background plates; the CSS landscape remains visible as their fallback.
 
 ## Replace project-specific placeholders
 
