@@ -11,6 +11,17 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Fischer Product Lab | Many paths. One laboratory.",
     description: "Independent products for clearer decisions, stronger trust, and better-operated systems.",
+    icons: {
+      icon: [
+        { url: "/favicon.svg", type: "image/svg+xml", sizes: "any" },
+        { url: "/icon-512.png", type: "image/png", sizes: "512x512" },
+        { url: "/favicon-48x48.png", type: "image/png", sizes: "48x48" },
+        { url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
+        { url: "/favicon-16x16.png", type: "image/png", sizes: "16x16" },
+      ],
+      shortcut: "/favicon.ico",
+      apple: [{ url: "/apple-touch-icon.png", type: "image/png", sizes: "180x180" }],
+    },
     openGraph: {
       title: "Fischer Product Lab | Many paths. One laboratory.",
       description: "Independent products for clearer decisions, stronger trust, and better-operated systems.",
