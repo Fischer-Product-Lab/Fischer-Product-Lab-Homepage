@@ -56,6 +56,26 @@ export const products = [
     coordinate: "61.4 / T",
   },
   {
+    id: "aurora",
+    name: "Aurora",
+    eyebrow: "Agent Orchestration",
+    tagline:
+      "Watch an AI agent team investigate, make controlled decisions, recover from failure, and prove the result.",
+    description:
+      "An interactive laboratory for watching simulated AI agents investigate in parallel, challenge incomplete plans, respect approval and spending limits, recover from failure, and verify the outcome.",
+    portfolioValue:
+      "Aurora makes coordination, evidence, review, permissions, budgets, recovery, and verification understandable.",
+    status: "Featured",
+    url: "https://aurora-fpl.vercel.app",
+    githubUrl: "https://github.com/Fischer-Product-Lab/aurora-fpl",
+    ctaLabel: "Explore the simulation",
+    landmark: "The Aurora Observatory",
+    inspiration: "Northern lights converging above a dark observatory",
+    accent: "glacial teal and quiet violet",
+    routeLabel: "Explore the simulation",
+    coordinate: "66.5 / O",
+  },
+  {
     id: "agentops",
     name: "AgentOps",
     eyebrow: "AI Agent Governance",

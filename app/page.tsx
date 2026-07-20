@@ -8,6 +8,7 @@ const metrics: Record<ProductId, readonly [string, string, string, string]> = {
   vulnboard: ["Risk score", "68", "SLA debt", "87 overdue"],
   portfoliohealth: ["Health", "69", "SLA risk", "8"],
   trustdesk: ["Open", "7", "Automation", "51%"],
+  aurora: ["Lanes", "4", "Checks", "2 / 2"],
   agentops: ["Agents", "8", "Launch ready", "3"],
 };
 
@@ -95,6 +96,25 @@ function Monument({ product }: { product: Product }) {
     );
   }
 
+  if (product.id === "aurora") {
+    return (
+      <div className="monument aurora-observatory" aria-hidden="true">
+        <div className="aurora-ribbons">
+          <i className="aurora-ribbon aurora-ribbon-a" />
+          <i className="aurora-ribbon aurora-ribbon-b" />
+          <i className="aurora-ribbon aurora-ribbon-c" />
+        </div>
+        <span className="aurora-horizon" />
+        <div className="aurora-dome"><i className="aurora-aperture" /></div>
+        <div className="aurora-station">
+          <i className="aurora-pier aurora-pier-left" />
+          <InterfaceFragment product={product} />
+          <i className="aurora-pier aurora-pier-right" />
+        </div>
+      </div>
+    );
+  }
+
   if (product.id === "agentops") {
     return (
       <div className="monument control-tower" aria-hidden="true">
@@ -123,6 +143,9 @@ function Landmark({
   onDeactivate: () => void;
   onNavigate: (event: React.MouseEvent<HTMLAnchorElement>, product: Product) => void;
 }) {
+  const annotationCta = "ctaLabel" in product ? product.ctaLabel : "Enter";
+  const githubUrl = "githubUrl" in product ? product.githubUrl : null;
+
   return (
     <article
       className={`landmark landmark-${product.id}${active ? " is-active" : ""}`}
@@ -148,7 +171,10 @@ function Landmark({
         <p>{product.eyebrow}</p>
         <h3>{product.landmark}</h3>
         <span>{product.tagline}</span>
-        <a href={product.url} target="_blank" rel="noreferrer">Enter <i aria-hidden="true">↗</i></a>
+        <div className="annotation-actions">
+          <a href={product.url} target="_blank" rel="noreferrer">{annotationCta} <i aria-hidden="true">↗</i></a>
+          {githubUrl && <a className="annotation-source" href={githubUrl} target="_blank" rel="noreferrer" aria-label={`${product.name} on GitHub`}>GitHub <i aria-hidden="true">↗</i></a>}
+        </div>
       </div>
     </article>
   );
@@ -254,7 +280,7 @@ export default function Home() {
           <p>Independent products for clearer decisions, stronger trust, and better-operated systems.</p>
           <a className="text-link" href="#paths">Choose a path <span aria-hidden="true">↓</span></a>
         </div>
-        <div className="landscape" role="group" aria-label="Five product landmarks">
+        <div className="landscape" role="group" aria-label="Six product landmarks">
           {products.map((product) => (
             <Landmark
               key={product.id}
@@ -274,7 +300,7 @@ export default function Home() {
       <section className="paths section-shell" id="paths" aria-labelledby="paths-title">
         <div className="section-heading">
           <SectionMark number="02">Choose a path</SectionMark>
-          <h2 id="paths-title">Five questions.<br />Five working answers.</h2>
+          <h2 id="paths-title">Six questions.<br />Six working answers.</h2>
           <p>Each route leads to a live product. The landscape remains; the instruments come into focus.</p>
         </div>
         <div className="path-list">
@@ -298,7 +324,7 @@ export default function Home() {
         <div className="lab-copy">
           <SectionMark number="03">Inside the lab</SectionMark>
           <h2 id="lab-title">The work begins<br />with a useful question.</h2>
-          <p>What signal is missing? Where does service health begin to drift? Where does trust slow down? Which risk needs an owner? What should be ready before launch?</p>
+          <p>What signal is missing? Where does service health begin to drift? Where does trust slow down? Which risk needs an owner? How should agent work stay controlled when a plan or specialist fails? What should be ready before launch?</p>
           <p>Each product begins as a question. The lab is where we build the answer.</p>
         </div>
         <p className="lab-note">Some paths lead to finished products. Others remain experiments. All of them move the work forward.</p>

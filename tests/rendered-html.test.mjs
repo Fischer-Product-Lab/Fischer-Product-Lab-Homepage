@@ -33,13 +33,16 @@ test("server-renders the complete Fischer Product Lab journey", async () => {
   assert.match(html, /Product index/i);
   assert.match(html, /Portfolio Health/i);
   assert.match(html, /The Confluence Rotunda/i);
+  assert.match(html, /Aurora/i);
+  assert.match(html, /The Aurora Observatory/i);
+  assert.match(html, /Explore the simulation/i);
   assert.match(html, /\/favicon\.svg/);
   assert.match(html, /\/icon-512\.png/);
   assert.match(html, /\/favicon\.ico/);
   assert.match(html, /\/apple-touch-icon\.png/);
 });
 
-test("ships all five truthful product destinations and accessibility fallbacks", async () => {
+test("ships all six truthful product destinations and accessibility fallbacks", async () => {
   const [page, layout, css, products] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
@@ -52,15 +55,18 @@ test("ships all five truthful product destinations and accessibility fallbacks",
   assert.match(products, /https:\/\/portfolio-health-fpl\.vercel\.app\//);
   assert.match(products, /https:\/\/trustdesk-fpl\.vercel\.app\//);
   assert.match(products, /https:\/\/agentops-fpl\.vercel\.app\//);
+  assert.match(products, /https:\/\/aurora-fpl\.vercel\.app/);
+  assert.match(products, /https:\/\/github\.com\/Fischer-Product-Lab\/aurora-fpl/);
+  assert.doesNotMatch(products, /aurora[^\n]*t-fischer2\.chatgpt\.site/i);
   assert.match(products, /as const/);
   assert.match(page, /sessionStorage/);
   assert.match(page, /prefers-reduced-motion/);
   assert.match(page, /aria-label="Product index"/);
-  assert.match(page, /aria-label="Five product landmarks"/);
-  assert.match(page, /Five questions\./);
+  assert.match(page, /aria-label="Six product landmarks"/);
+  assert.match(page, /Six questions\./);
   assert.match(page, /<a[\s\S]*href=\{product\.url\}/);
   assert.match(page, /rotunda/);
-  assert.match(layout, /\/og\.png/);
+  assert.match(layout, /\/og-aurora\.png/);
   assert.match(layout, /\/favicon\.svg/);
   assert.match(layout, /\/icon-512\.png/);
   assert.match(layout, /\/favicon\.ico/);
@@ -76,9 +82,12 @@ test("ships all five truthful product destinations and accessibility fallbacks",
   assert.match(css, /:focus-visible/);
   assert.match(css, /\.ridge \{[^}]*pointer-events: none/);
   assert.match(css, /\.rotunda-dome/);
+  assert.match(css, /\.aurora-ribbons/);
+  assert.match(css, /\.landmark-aurora/);
+  assert.match(css, /\.path-aurora/);
   assert.doesNotMatch(page, /canvas|three|WebGL/i);
   await Promise.all([
-    access(new URL("public/og.png", root)),
+    access(new URL("public/og-aurora.png", root)),
     access(new URL("public/favicon.svg", root)),
     access(new URL("public/favicon.ico", root)),
     access(new URL("public/favicon-16x16.png", root)),
