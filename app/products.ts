@@ -89,6 +89,26 @@ export const products = [
     routeLabel: "Command the fleet",
     coordinate: "88.2 / G",
   },
+  {
+    id: "programforge",
+    name: "ProgramForge",
+    eyebrow: "Cross-Team Program Management",
+    tagline:
+      "See which cross-team initiatives are on track, what is blocked, and what leadership must decide this cycle.",
+    description:
+      "An executive program-management dashboard for priorities, dependencies, RAID, readiness gates, milestones, capacity pressure, and leadership briefs.",
+    portfolioValue:
+      "ProgramForge turns mid-flight delivery signals into deterministic, explainable program health and a decision-ready leadership view.",
+    status: "New",
+    url: "https://program-forge-fpl.vercel.app/",
+    githubUrl: "https://github.com/Fischer-Product-Lab/ProgramForge",
+    ctaLabel: "Explore the dashboard",
+    landmark: "The Forge of Hephaestus",
+    inspiration: "The Temple of Hephaestus reimagined as a working decision forge",
+    accent: "weathered bronze, ember gold, and muted plum",
+    routeLabel: "Enter the forge",
+    coordinate: "75.0 / F",
+  },
 ] as const;
 
 export type Product = (typeof products)[number];
