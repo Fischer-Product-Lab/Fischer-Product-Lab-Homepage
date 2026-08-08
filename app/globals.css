@@ -510,7 +510,7 @@ button { font: inherit; }
 .landmark-aurora .annotation { left: 28%; bottom: 195px; width: 230px; }
 .landmark-programforge .annotation { left: 22%; bottom: 195px; width: 230px; }
 .landmark-orrery .annotation { left: -28%; bottom: 105px; width: 230px; }
-.annotation-meta { display:flex; justify-content:space-between; color:rgba(231,233,229,.5); font-size:7px; line-height:1.2; letter-spacing:.14em; text-transform:uppercase; }.annotation-meta b{color:var(--accent)}
+.annotation-meta { display:flex; justify-content:space-between; gap:12px; color:rgba(231,233,229,.5); font-size:7px; line-height:1.2; letter-spacing:.14em; text-transform:uppercase; }.annotation-meta b{color:var(--accent);font-size:9px;letter-spacing:.08em;text-transform:none;white-space:nowrap}.annotation-meta>span{white-space:nowrap}
 .annotation p { margin:8px 0 3px; color:var(--accent); font-size:7px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }.annotation h3{margin:0;font-family:var(--serif);font-size:clamp(18px,1.2vw,20px);font-weight:400;line-height:1.08}.annotation > span:not(.annotation-meta){display:block;margin-top:8px;color:rgba(231,233,229,.76);font-family:var(--serif);font-size:clamp(10px,.7vw,11px);line-height:1.5}.annotation-actions{display:flex;flex-wrap:wrap;gap:7px 14px;align-items:center;margin-top:10px}.annotation a{display:inline-block;color:var(--fog);font-size:8px;font-weight:700;letter-spacing:.14em;text-decoration:none;text-transform:uppercase;pointer-events:auto}.annotation a i{color:var(--accent);font-style:normal}.annotation-source{color:rgba(231,233,229,.62)!important}
 .landmark.is-active { z-index: 8; }
 .landmark.is-active .annotation,

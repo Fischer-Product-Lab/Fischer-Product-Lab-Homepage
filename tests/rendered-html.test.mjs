@@ -42,6 +42,8 @@ test("server-renders the complete Fischer Product Lab journey", async () => {
   assert.match(html, /ORRERY/);
   assert.match(html, /The Meridian Armillary/i);
   assert.match(html, /Explore the instrument/i);
+  assert.equal((html.match(/aria-label="[^"]+ on GitHub"/g) ?? []).length, 8);
+  assert.match(html, /annotation-meta"><b>ProductPulse<\/b><span>43\.1 \/ A<\/span>/);
   assert.match(html, /\/favicon\.svg/);
   assert.match(html, /\/icon-512\.png/);
   assert.match(html, /\/favicon\.ico/);
@@ -57,10 +59,15 @@ test("ships all eight truthful product destinations and accessibility fallbacks"
   ]);
 
   assert.match(products, /https:\/\/productpulse-fpl\.vercel\.app\//);
+  assert.match(products, /https:\/\/github\.com\/Fischer-Product-Lab\/productpulse/);
   assert.match(products, /https:\/\/vuln-board-fpl\.vercel\.app\/dashboard/);
+  assert.match(products, /https:\/\/github\.com\/Fischer-Product-Lab\/VulnBoard/);
   assert.match(products, /https:\/\/portfolio-health-fpl\.vercel\.app\//);
+  assert.match(products, /https:\/\/github\.com\/Fischer-Product-Lab\/portfolio-health/);
   assert.match(products, /https:\/\/trustdesk-fpl\.vercel\.app\//);
+  assert.match(products, /https:\/\/github\.com\/Fischer-Product-Lab\/trustdesk/);
   assert.match(products, /https:\/\/agentops-fpl\.vercel\.app\//);
+  assert.match(products, /https:\/\/github\.com\/Fischer-Product-Lab\/agentops/);
   assert.match(products, /https:\/\/aurora-fpl\.vercel\.app/);
   assert.match(products, /https:\/\/github\.com\/Fischer-Product-Lab\/aurora-fpl/);
   assert.match(products, /https:\/\/program-forge-fpl\.vercel\.app\//);
@@ -77,6 +84,9 @@ test("ships all eight truthful product destinations and accessibility fallbacks"
   assert.match(page, /aria-label="Eight product landmarks"/);
   assert.match(page, /Eight questions\./);
   assert.match(page, /<a[\s\S]*href=\{product\.url\}/);
+  assert.match(page, /<b>\{product\.name\}<\/b>/);
+  assert.doesNotMatch(page, /annotation-meta"><b>\{product\.status\}<\/b>/);
+  assert.match(page, /aria-label=\{`\$\{product\.name\} on GitHub`\}/);
   assert.match(page, /rotunda/);
   assert.match(layout, /\/og\.png/);
   assert.match(layout, /\/favicon\.svg/);
@@ -89,6 +99,7 @@ test("ships all eight truthful product destinations and accessibility fallbacks"
   assert.match(css, /\.landmark-portfoliohealth \.annotation\{left:220%\}/);
   assert.match(css, /\.landmark-agentops \.annotation\{left:40%\}/);
   assert.match(css, /\.annotation h3\{[^}]*font-size:clamp\(18px,1\.2vw,20px\)/);
+  assert.match(css, /\.annotation-meta b\{[^}]*text-transform:none/);
   assert.match(css, /\.annotation > span:not\(\.annotation-meta\)\{[^}]*font-size:clamp\(10px,\.7vw,11px\)/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(css, /:focus-visible/);

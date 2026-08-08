@@ -218,7 +218,7 @@ function Landmark({
         <span className="landmark-name">{product.name}</span>
       </a>
       <div className="annotation">
-        <span className="annotation-meta"><b>{product.status}</b> {product.coordinate}</span>
+        <span className="annotation-meta"><b>{product.name}</b><span>{product.coordinate}</span></span>
         <p>{product.eyebrow}</p>
         <h3>{product.landmark}</h3>
         <span>{product.tagline}</span>
