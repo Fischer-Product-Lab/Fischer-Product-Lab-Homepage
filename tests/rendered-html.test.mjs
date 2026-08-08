@@ -94,6 +94,8 @@ test("ships all eight truthful product destinations and accessibility fallbacks"
   assert.match(layout, /\/favicon\.ico/);
   assert.match(layout, /\/apple-touch-icon\.png/);
   assert.match(css, /@media \(max-width:800px\)/);
+  assert.match(css, /--threshold-horizon: calc\(58% \+ clamp\(18px, 2\.5vh, 28px\)\)/);
+  assert.match(css, /top: var\(--threshold-horizon\)/);
   assert.match(css, /@media \(min-width:801px\)[\s\S]*?\.landscape\{z-index:9\}/);
   assert.match(css, /\.landmark-vulnboard \.annotation\{left:165%;bottom:72px\}/);
   assert.match(css, /\.landmark-portfoliohealth \.annotation\{left:220%\}/);
