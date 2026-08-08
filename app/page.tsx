@@ -11,6 +11,7 @@ const metrics: Record<ProductId, readonly [string, string, string, string]> = {
   aurora: ["Lanes", "4", "Checks", "2 / 2"],
   agentops: ["Agents", "8", "Launch ready", "3"],
   programforge: ["Portfolio", "75", "Decisions", "4"],
+  orrery: ["Surfaces", "5", "Patterns", "11"],
 };
 
 function useReducedMotion() {
@@ -148,6 +149,30 @@ function Monument({ product }: { product: Product }) {
         </div>
         <div className="heph-embers"><i /><i /><i /></div>
         <span className="heph-steps" />
+      </div>
+    );
+  }
+
+  if (product.id === "orrery") {
+    return (
+      <div className="monument meridian-armillary" aria-hidden="true">
+        <div className="orrery-rings">
+          <i className="orrery-orbit orrery-orbit-a"><span /></i>
+          <i className="orrery-orbit orrery-orbit-b"><span /></i>
+          <i className="orrery-orbit orrery-orbit-c"><span /></i>
+          <div className="orrery-surfaces">
+            {Array.from({ length: 5 }, (_, i) => <i key={i} />)}
+          </div>
+          <span className="orrery-needs-you" />
+        </div>
+        <div className="orrery-telescope">
+          <i className="orrery-lens" />
+          <i className="orrery-collar orrery-collar-a" />
+          <i className="orrery-collar orrery-collar-b" />
+        </div>
+        <div className="orrery-fork"><i /><i /></div>
+        <div className="orrery-pier"><InterfaceFragment product={product} /></div>
+        <span className="orrery-summit" />
       </div>
     );
   }
@@ -306,7 +331,7 @@ export default function Home() {
           <p>Independent products for clearer decisions, stronger trust, and better-operated systems.</p>
           <a className="text-link" href="#paths">Choose a path <span aria-hidden="true">↓</span></a>
         </div>
-        <div className="landscape" role="group" aria-label="Seven product landmarks">
+        <div className="landscape" role="group" aria-label="Eight product landmarks">
           {products.map((product) => (
             <Landmark
               key={product.id}
@@ -326,7 +351,7 @@ export default function Home() {
       <section className="paths section-shell" id="paths" aria-labelledby="paths-title">
         <div className="section-heading">
           <SectionMark number="02">Choose a path</SectionMark>
-          <h2 id="paths-title">Seven questions.<br />Seven working answers.</h2>
+          <h2 id="paths-title">Eight questions.<br />Eight working answers.</h2>
           <p>Each route leads to a live product. The landscape remains; the instruments come into focus.</p>
         </div>
         <div className="path-list">
@@ -350,7 +375,7 @@ export default function Home() {
         <div className="lab-copy">
           <SectionMark number="03">Inside the lab</SectionMark>
           <h2 id="lab-title">The work begins<br />with a useful question.</h2>
-          <p>What signal is missing? Where does service health begin to drift? Where does trust slow down? Which risk needs an owner? How should agent work stay controlled when a plan or specialist fails? What should be ready before launch? Are the right cross-team initiatives on track, unblocked, and ready for leadership decision?</p>
+          <p>What signal is missing? Where does service health begin to drift? Where does trust slow down? Which risk needs an owner? How should agent work stay controlled when a plan or specialist fails? What should be ready before launch? Are the right cross-team initiatives on track, unblocked, and ready for leadership decision? How should people supervise long-running agents without reducing the work to a chat transcript?</p>
           <p>Each product begins as a question. The lab is where we build the answer.</p>
         </div>
         <p className="lab-note">Some paths lead to finished products. Others remain experiments. All of them move the work forward.</p>

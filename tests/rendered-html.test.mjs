@@ -39,13 +39,16 @@ test("server-renders the complete Fischer Product Lab journey", async () => {
   assert.match(html, /ProgramForge/i);
   assert.match(html, /The Forge of Hephaestus/i);
   assert.match(html, /Explore the dashboard/i);
+  assert.match(html, /ORRERY/);
+  assert.match(html, /The Meridian Armillary/i);
+  assert.match(html, /Explore the instrument/i);
   assert.match(html, /\/favicon\.svg/);
   assert.match(html, /\/icon-512\.png/);
   assert.match(html, /\/favicon\.ico/);
   assert.match(html, /\/apple-touch-icon\.png/);
 });
 
-test("ships all seven truthful product destinations and accessibility fallbacks", async () => {
+test("ships all eight truthful product destinations and accessibility fallbacks", async () => {
   const [page, layout, css, products] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
@@ -64,13 +67,15 @@ test("ships all seven truthful product destinations and accessibility fallbacks"
   assert.match(products, /https:\/\/github\.com\/Fischer-Product-Lab\/ProgramForge/);
   assert.doesNotMatch(products, /https:\/\/programforge-fpl\.vercel\.app/i);
   assert.doesNotMatch(products, /https:\/\/program-forge\.vercel\.app\//i);
+  assert.match(products, /https:\/\/orrery-orpin\.vercel\.app\//);
+  assert.match(products, /https:\/\/github\.com\/Fischer-Product-Lab\/FPL-Orrery/);
   assert.doesNotMatch(products, /aurora[^\n]*t-fischer2\.chatgpt\.site/i);
   assert.match(products, /as const/);
   assert.match(page, /sessionStorage/);
   assert.match(page, /prefers-reduced-motion/);
   assert.match(page, /aria-label="Product index"/);
-  assert.match(page, /aria-label="Seven product landmarks"/);
-  assert.match(page, /Seven questions\./);
+  assert.match(page, /aria-label="Eight product landmarks"/);
+  assert.match(page, /Eight questions\./);
   assert.match(page, /<a[\s\S]*href=\{product\.url\}/);
   assert.match(page, /rotunda/);
   assert.match(layout, /\/og\.png/);
@@ -96,6 +101,11 @@ test("ships all seven truthful product destinations and accessibility fallbacks"
   assert.match(css, /\.landmark-programforge/);
   assert.match(css, /\.path-programforge/);
   assert.match(css, /\.landmark-programforge \.annotation/);
+  assert.match(css, /\.meridian-armillary/);
+  assert.match(css, /\.orrery-needs-you/);
+  assert.match(css, /\.landmark-orrery/);
+  assert.match(css, /\.path-orrery/);
+  assert.match(css, /\.landmark-orrery \.annotation/);
   assert.doesNotMatch(page, /canvas|three|WebGL/i);
   await Promise.all([
     access(new URL("public/og.png", root)),

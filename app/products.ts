@@ -109,6 +109,27 @@ export const products = [
     routeLabel: "Enter the forge",
     coordinate: "75.0 / F",
   },
+  {
+    id: "orrery",
+    name: "ORRERY",
+    eyebrow: "Agent Supervision Laboratory",
+    tagline:
+      "Supervise long-running agents through plans, tools, approvals, cost, provenance, and fleet state instead of a longer chat transcript.",
+    description:
+      "A fictional agentic UX laboratory that renders one shared event stream across mission control, plain language, terminal, mobile, and ambient observatory surfaces.",
+    portfolioValue:
+      "ORRERY turns agent supervision into a reusable interface language for plans, tools, approval gates, provenance, triage, and human control.",
+    status: "Exploration",
+    url: "https://orrery-orpin.vercel.app/",
+    githubUrl: "https://github.com/Fischer-Product-Lab/FPL-Orrery",
+    ctaLabel: "Explore the instrument",
+    landmark: "The Meridian Armillary",
+    inspiration:
+      "An exposed mountaintop telescope nested inside an armillary sphere, tracking one event stream across five operational surfaces.",
+    accent: "phosphor amber and cold starlight",
+    routeLabel: "Explore the instrument",
+    coordinate: "05.11 / O",
+  },
 ] as const;
 
 export type Product = (typeof products)[number];
