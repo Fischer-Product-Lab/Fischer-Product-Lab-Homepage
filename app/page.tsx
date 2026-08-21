@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { products, type Product, type ProductId } from "./products";
 
 const metrics: Record<ProductId, readonly [string, string, string, string]> = {
@@ -249,7 +249,6 @@ export default function Home() {
   const titleCardRef = useRef<HTMLElement>(null);
   const enteredRef = useRef(true);
   const yieldingRef = useRef(false);
-  const enterLandscapeRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -262,7 +261,7 @@ export default function Home() {
     return () => window.clearTimeout(timer);
   }, []);
 
-  function enterLandscape() {
+  const enterLandscape = useCallback(() => {
     if (enteredRef.current || yieldingRef.current) return;
     yieldingRef.current = true;
     window.sessionStorage.setItem("fpl-entered", "true");
@@ -272,9 +271,7 @@ export default function Home() {
       setEntered(true);
       heroRef.current?.focus();
     }, reducedMotion ? 0 : TITLE_YIELD_MS);
-  }
-
-  enterLandscapeRef.current = enterLandscape;
+  }, [reducedMotion]);
 
   useEffect(() => {
     if (!ready || entered) return;
@@ -282,16 +279,16 @@ export default function Home() {
 
     const onKey = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
-      enterLandscapeRef.current();
+      enterLandscape();
     };
 
-    const auto = window.setTimeout(() => enterLandscapeRef.current(), TITLE_HOLD_MS);
+    const auto = window.setTimeout(enterLandscape, TITLE_HOLD_MS);
     window.addEventListener("keydown", onKey);
     return () => {
       window.clearTimeout(auto);
       window.removeEventListener("keydown", onKey);
     };
-  }, [ready, entered]);
+  }, [ready, entered, enterLandscape]);
 
   function navigate(event: React.MouseEvent<HTMLAnchorElement>, product: Product) {
     if (reducedMotion || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
