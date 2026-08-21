@@ -16,46 +16,48 @@ async function render() {
   );
 }
 
-test("server-renders the complete Fischer Product Lab journey", async () => {
+test("server-renders the Fischer Product Lab cinematic portfolio", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
-  assert.match(html, /Fischer Product Lab \| Many paths\. One laboratory\./);
-  assert.match(html, /Independent products for clearer decisions/);
-  assert.match(html, /The frontier/i);
-  assert.match(html, /Choose a path/i);
-  assert.match(html, /Inside the lab/i);
-  assert.match(html, /Field notes/i);
-  assert.match(html, /The builder/i);
-  assert.match(html, /What should/i);
+  assert.match(html, /Fischer Product Lab \| A security and AI product laboratory\./);
+  assert.match(html, /Public, synthetic, read-only enterprise demonstrations/);
+  assert.match(html, /A security and AI/);
+  assert.match(html, /product laboratory/);
+  assert.match(html, /See the products/);
+  assert.match(html, /Open TrustDesk/);
   assert.match(html, /Product index/i);
-  assert.match(html, /Portfolio Health/i);
-  assert.match(html, /The Confluence Rotunda/i);
-  assert.match(html, /Aurora/i);
-  assert.match(html, /The Aurora Observatory/i);
-  assert.match(html, /Explore the simulation/i);
-  assert.match(html, /ProgramForge/i);
-  assert.match(html, /The Forge of Hephaestus/i);
-  assert.match(html, /Explore the dashboard/i);
+  assert.match(html, /Featured TrustDesk product/);
+  assert.match(html, /Northwind Capital/);
+  assert.match(html, /trustdesk · questionnaires \/ qn-001/);
+  assert.match(html, /ProductPulse/);
+  assert.match(html, /VulnBoard/);
+  assert.match(html, /Portfolio Health/);
+  assert.match(html, /TrustDesk/);
+  assert.match(html, /Aurora/);
+  assert.match(html, /Explore the simulation/);
+  assert.match(html, /AgentOps/);
+  assert.match(html, /ProgramForge/);
+  assert.match(html, /Explore the dashboard/);
   assert.match(html, /ORRERY/);
-  assert.match(html, /The Meridian Armillary/i);
-  assert.match(html, /Explore the instrument/i);
+  assert.match(html, /Explore the instrument/);
+  assert.match(html, /hello@fischerproductlab\.com/);
   assert.equal((html.match(/aria-label="[^"]+ on GitHub"/g) ?? []).length, 8);
-  assert.match(html, /annotation-meta"><b>ProductPulse<\/b><span>43\.1 \/ A<\/span>/);
   assert.match(html, /\/favicon\.svg/);
   assert.match(html, /\/icon-512\.png/);
   assert.match(html, /\/favicon\.ico/);
   assert.match(html, /\/apple-touch-icon\.png/);
 });
 
-test("ships all eight truthful product destinations and accessibility fallbacks", async () => {
-  const [page, layout, css, products] = await Promise.all([
+test("ships all eight truthful product destinations and the locked visual language", async () => {
+  const [page, layout, css, products, design] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/products.ts", import.meta.url), "utf8"),
+    readFile(new URL("../DESIGN.md", import.meta.url), "utf8"),
   ]);
 
   assert.match(products, /https:\/\/productpulse-fpl\.vercel\.app\//);
@@ -78,48 +80,43 @@ test("ships all eight truthful product destinations and accessibility fallbacks"
   assert.match(products, /https:\/\/github\.com\/Fischer-Product-Lab\/FPL-Orrery/);
   assert.doesNotMatch(products, /aurora[^\n]*t-fischer2\.chatgpt\.site/i);
   assert.match(products, /as const/);
-  assert.match(page, /sessionStorage/);
-  assert.match(page, /prefers-reduced-motion/);
+
+  assert.match(page, /featured\.url/);
   assert.match(page, /aria-label="Product index"/);
-  assert.match(page, /aria-label="Eight product landmarks"/);
-  assert.match(page, /Eight questions\./);
   assert.match(page, /<a[\s\S]*href=\{product\.url\}/);
-  assert.match(page, /<b>\{product\.name\}<\/b>/);
-  assert.doesNotMatch(page, /annotation-meta"><b>\{product\.status\}<\/b>/);
   assert.match(page, /aria-label=\{`\$\{product\.name\} on GitHub`\}/);
-  assert.match(page, /rotunda/);
+  assert.match(page, /hello@fischerproductlab\.com/);
+  assert.match(page, /Northwind Capital/);
+  assert.doesNotMatch(page, /sessionStorage/);
+  assert.doesNotMatch(page, /Enter the landscape/);
+  assert.doesNotMatch(page, /trusted by/i);
+  assert.doesNotMatch(page, /canvas|three|WebGL/i);
+
+  assert.match(layout, /Geist/);
+  assert.match(layout, /Geist_Mono/);
   assert.match(layout, /\/og\.png/);
   assert.match(layout, /\/favicon\.svg/);
   assert.match(layout, /\/icon-512\.png/);
   assert.match(layout, /\/favicon\.ico/);
   assert.match(layout, /\/apple-touch-icon\.png/);
-  assert.match(css, /@media \(max-width:800px\)/);
-  assert.match(css, /--threshold-horizon: calc\(58% \+ clamp\(18px, 2\.5vh, 28px\)\)/);
-  assert.match(css, /top: var\(--threshold-horizon\)/);
-  assert.match(css, /@media \(min-width:801px\)[\s\S]*?\.landscape\{z-index:9\}/);
-  assert.match(css, /\.landmark-vulnboard \.annotation\{left:165%;bottom:72px\}/);
-  assert.match(css, /\.landmark-portfoliohealth \.annotation\{left:220%\}/);
-  assert.match(css, /\.landmark-agentops \.annotation\{left:40%\}/);
-  assert.match(css, /\.annotation h3\{[^}]*font-size:clamp\(18px,1\.2vw,20px\)/);
-  assert.match(css, /\.annotation-meta b\{[^}]*text-transform:none/);
-  assert.match(css, /\.annotation > span:not\(\.annotation-meta\)\{[^}]*font-size:clamp\(10px,\.7vw,11px\)/);
+
+  assert.match(css, /#0b1220/i);
+  assert.match(css, /#f4efe4/i);
+  assert.match(css, /#c4a35a/i);
+  assert.match(css, /\.marketing-grain/);
+  assert.match(css, /\.marketing-light/);
+  assert.match(css, /\.product-window/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
-  assert.match(css, /:focus-visible/);
-  assert.match(css, /\.ridge \{[^}]*pointer-events: none/);
-  assert.match(css, /\.rotunda-dome/);
-  assert.match(css, /\.aurora-ribbons/);
-  assert.match(css, /\.landmark-aurora/);
-  assert.match(css, /\.path-aurora/);
-  assert.match(css, /\.hephaestus-forge/);
-  assert.match(css, /\.landmark-programforge/);
-  assert.match(css, /\.path-programforge/);
-  assert.match(css, /\.landmark-programforge \.annotation/);
-  assert.match(css, /\.meridian-armillary/);
-  assert.match(css, /\.orrery-needs-you/);
-  assert.match(css, /\.landmark-orrery/);
-  assert.match(css, /\.path-orrery/);
-  assert.match(css, /\.landmark-orrery \.annotation/);
-  assert.doesNotMatch(page, /canvas|three|WebGL/i);
+  assert.match(css, /:focus-visible|:focus\b/);
+  assert.doesNotMatch(css, /--threshold-horizon/);
+  assert.doesNotMatch(css, /\.rotunda-dome/);
+
+  assert.match(design, /#0B1220/);
+  assert.match(design, /#F4EFE4/);
+  assert.match(design, /#C4A35A/);
+  assert.match(design, /Kill list/);
+  assert.match(design, /No Inter/);
+
   await Promise.all([
     access(new URL("public/og.png", root)),
     access(new URL("public/favicon.svg", root)),
@@ -129,7 +126,5 @@ test("ships all eight truthful product destinations and accessibility fallbacks"
     access(new URL("public/favicon-48x48.png", root)),
     access(new URL("public/apple-touch-icon.png", root)),
     access(new URL("public/icon-512.png", root)),
-    access(new URL("public/landscape-hero.webp", root)),
-    access(new URL("public/landscape-hero-mobile.webp", root)),
   ]);
 });
