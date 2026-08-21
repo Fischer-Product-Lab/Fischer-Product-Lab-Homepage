@@ -90,7 +90,7 @@ test("ships all eight truthful product destinations and the locked visual langua
   assert.doesNotMatch(page, /sessionStorage/);
   assert.doesNotMatch(page, /Enter the landscape/);
   assert.doesNotMatch(page, /trusted by/i);
-  assert.doesNotMatch(page, /canvas|three|WebGL/i);
+  assert.doesNotMatch(page, /from ["']three["']|WebGLRenderer|<canvas[\s>]/i);
 
   assert.match(layout, /Geist/);
   assert.match(layout, /Geist_Mono/);

@@ -1,10 +1,14 @@
 import { products, type Product } from "./products";
 
-const featured = products.find((product) => product.id === "trustdesk");
-
-if (!featured) {
-  throw new Error("TrustDesk must remain in app/products.ts");
+function requireProduct(id: Product["id"]): Product {
+  const product = products.find((entry) => entry.id === id);
+  if (!product) {
+    throw new Error(`${id} must remain in app/products.ts`);
+  }
+  return product;
 }
+
+const featured = requireProduct("trustdesk");
 
 const CONTACT_EMAIL = "hello@fischerproductlab.com";
 
