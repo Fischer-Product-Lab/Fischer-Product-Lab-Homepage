@@ -50,14 +50,15 @@ test("server-renders the complete Fischer Product Lab journey", async () => {
   assert.match(html, /\/apple-touch-icon\.png/);
 });
 
-test("title card wins first paint and keeps the wordmark off the gold beam", async () => {
+test("title card wins first paint and leaves the gold hall visible", async () => {
   const response = await render();
   const html = await response.text();
 
   assert.match(html, /class="title-card"/);
-  assert.match(html, /title-card-plaque/);
+  assert.match(html, /title-card-scrim/);
   assert.match(html, /id="title-card-wordmark"/);
   assert.match(html, /Click to enter/);
+  assert.doesNotMatch(html, /title-card-plaque/);
   assert.match(html, /sessionStorage\.getItem\("fpl-entered"\)/);
   assert.match(html, /classList\.add\("entered"\)/);
   assert.match(html, /prefers-reduced-motion: reduce/);
@@ -103,7 +104,8 @@ test("ships all eight truthful product destinations and accessibility fallbacks"
   assert.match(page, /sessionStorage/);
   assert.match(page, /prefers-reduced-motion/);
   assert.match(page, /title-card/);
-  assert.match(page, /title-card-plaque/);
+  assert.match(page, /title-card-scrim/);
+  assert.doesNotMatch(page, /title-card-plaque/);
   assert.match(page, /\/title-card\.webp/);
   assert.match(page, /keydown/);
   assert.match(page, /TITLE_ENTER_KEYS/);
@@ -140,12 +142,19 @@ test("ships all eight truthful product destinations and accessibility fallbacks"
   assert.match(css, /\.title-card-light/);
   assert.match(css, /\.title-card-plate/);
   assert.match(css, /\.title-card-enter/);
-  assert.match(css, /\.title-card-plaque/);
-  assert.match(css, /\.title-card-plaque\s*\{[^}]*background:\s*var\(--title-navy\)/);
+  assert.match(css, /\.title-card-scrim/);
+  assert.match(css, /\.title-card-scrim\s*\{[^}]*rgba\(11,18,32,\.4\)/);
+  assert.doesNotMatch(css, /title-card-plaque/);
+  assert.doesNotMatch(css, /\.title-card-copy[^{]*\{[^}]*background:\s*var\(--title-navy\)/);
+  assert.match(css, /@keyframes titleKenBurns\{[^}]*transform:/);
+  assert.match(css, /\.title-card-plate\s*\{[^}]*animation:[^}]*titleKenBurns 16s/);
+  assert.match(css, /\.title-card-copy h1\s*\{[^}]*text-shadow:/);
+  assert.match(css, /titleRise 1\.45s \.6s/);
   assert.match(css, /html\.entered \.title-card/);
   assert.match(css, /\.title-card\.is-yielding/);
   assert.match(css, /clamp\(56px, 12\.8vw, 168px\)/);
   assert.doesNotMatch(css, /text-shadow: 0 0 64px rgba\(11,18,32,\.55\)/);
+  assert.match(css, /\.title-card-plate\{animation:none;transform:none\}/);
   assert.match(css, /@media \(min-width:801px\)[\s\S]*?\.landscape\{z-index:9\}/);
   assert.match(css, /\.landmark-vulnboard \.annotation\{left:165%;bottom:72px\}/);
   assert.match(css, /\.landmark-portfoliohealth \.annotation\{left:220%\}/);

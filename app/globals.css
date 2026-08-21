@@ -142,11 +142,13 @@ html.entered .title-card {
 }
 .title-card-plate {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  inset: -3%;
+  width: 106%;
+  height: 106%;
   object-fit: cover;
   object-position: center 46%;
+  will-change: transform;
+  animation: titleKenBurns 16s ease-in-out infinite alternate;
 }
 .title-card-void::after {
   content: "";
@@ -154,8 +156,8 @@ html.entered .title-card {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 50% 48%, transparent 16%, rgba(11,18,32,.38) 56%, rgba(11,18,32,.78) 100%),
-    linear-gradient(180deg, rgba(11,18,32,.28) 0%, transparent 22%, transparent 68%, rgba(11,18,32,.55) 100%);
+    radial-gradient(ellipse at 50% 48%, transparent 28%, rgba(11,18,32,.2) 64%, rgba(11,18,32,.58) 100%),
+    linear-gradient(180deg, rgba(11,18,32,.16) 0%, transparent 18%, transparent 74%, rgba(11,18,32,.4) 100%);
 }
 .title-card-light {
   position: absolute;
@@ -178,21 +180,29 @@ html.entered .title-card {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
   animation: titleGrain .45s steps(2) infinite;
 }
+.title-card-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    transparent 22%,
+    rgba(11,18,32,.12) 34%,
+    rgba(11,18,32,.4) 46%,
+    rgba(11,18,32,.4) 58%,
+    rgba(11,18,32,.12) 70%,
+    transparent 82%
+  );
+  animation: titleScrim 1.1s .45s ease both;
+}
 .title-card-copy {
   position: relative;
   z-index: 2;
   width: min(1480px, calc(100% - 48px));
   padding: 0 2vw;
   text-align: center;
-}
-.title-card-plaque {
-  margin: 0 auto;
-  padding: clamp(32px, 4.8vw, 68px) clamp(24px, 5vw, 80px) clamp(36px, 5vw, 72px);
-  color: var(--title-ivory);
-  background: var(--title-navy);
-  border-radius: 24px;
-  isolation: isolate;
-  box-shadow: 0 0 80px 48px var(--title-navy);
 }
 .title-card-copy h1 {
   margin: 0 auto;
@@ -204,7 +214,8 @@ html.entered .title-card {
   letter-spacing: .045em;
   line-height: .92;
   text-wrap: balance;
-  animation: titleRise 1.55s .28s cubic-bezier(.2,.6,.2,1) both;
+  text-shadow: 0 1px 2px rgba(11,18,32,.92), 0 0 14px rgba(11,18,32,.7), 0 0 28px rgba(11,18,32,.42);
+  animation: titleRise 1.45s .6s cubic-bezier(.2,.6,.2,1) both;
 }
 .title-card-rule {
   display: block;
@@ -214,22 +225,23 @@ html.entered .title-card {
   background: var(--title-gold);
   box-shadow: 0 0 16px rgba(196,163,90,.45);
   transform-origin: center;
-  animation: titleRule 1.05s .85s cubic-bezier(.2,.6,.2,1) both;
+  animation: titleRule 1.05s 1.05s cubic-bezier(.2,.6,.2,1) both;
 }
 .title-card-copy p {
   margin: 0;
-  color: rgba(244,239,228,.72);
+  color: rgba(244,239,228,.78);
   font-family: var(--serif);
   font-size: clamp(16px, 1.7vw, 22px);
   letter-spacing: .04em;
-  animation: titleRise 1.35s 1.15s cubic-bezier(.2,.6,.2,1) both;
+  text-shadow: 0 1px 2px rgba(11,18,32,.88), 0 0 12px rgba(11,18,32,.58);
+  animation: titleRise 1.25s 1.2s cubic-bezier(.2,.6,.2,1) both;
 }
 .title-card-enter {
   position: absolute;
   z-index: 2;
   left: 0;
   right: 0;
-  bottom: max(32px, 7vh);
+  bottom: max(22px, 4.5vh);
   margin: 0;
   color: var(--title-gold);
   font-family: var(--sans);
@@ -238,7 +250,11 @@ html.entered .title-card {
   letter-spacing: .34em;
   text-transform: uppercase;
   text-align: center;
-  animation: titleRise 1.2s 1.55s cubic-bezier(.2,.6,.2,1) both, titleEnterPulse 2.8s 2.6s ease-in-out infinite;
+  background: none;
+  border: 0;
+  padding: 0;
+  text-shadow: 0 1px 2px rgba(11,18,32,.9), 0 0 10px rgba(11,18,32,.5);
+  animation: titleRise 1.15s 1.5s cubic-bezier(.2,.6,.2,1) both, titleEnterPulse 2.8s 2.6s ease-in-out infinite;
 }
 
 .hero-copy h1,
@@ -622,6 +638,8 @@ html.entered .title-card {
 .footer { display:grid;grid-template-columns:.65fr 1.2fr 1fr;gap:7vw;padding:70px clamp(28px,7vw,112px);border-top:1px solid var(--line);background:#06090d; }
 .footer-wordmark { display:flex;gap:15px;align-items:flex-start; }.footer-wordmark b{font-family:var(--serif);font-size:17px;font-weight:400;line-height:1.05}.footer .product-index{display:grid;grid-template-columns:120px 1fr;gap:20px}.footer .index-links{grid-template-columns:1fr 1fr;gap:14px}.footer-meta{display:grid;justify-content:end;gap:11px;text-align:right}.footer-meta a,.footer-meta span{color:rgba(231,233,229,.46);font-size:7px;letter-spacing:.12em;text-decoration:none;text-transform:uppercase}.footer-meta a:hover,.footer-meta a:focus-visible{color:var(--fog);outline:none}
 
+@keyframes titleKenBurns{0%{transform:scale(1) translate3d(.6%,0,0)}100%{transform:scale(1.055) translate3d(-1.1%,-.7%,0)}}
+@keyframes titleScrim{0%{opacity:0}100%{opacity:1}}
 @keyframes titleLightBloom{0%{opacity:0;transform:translate(-50%,-50%) scale(.72)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
 @keyframes titleRise{0%{opacity:0;transform:translateY(14px)}100%{opacity:1;transform:none}}
 @keyframes titleRule{0%{opacity:0;transform:scaleX(.12)}100%{opacity:1;transform:scaleX(1)}}
@@ -692,7 +710,7 @@ html.entered .title-card {
   .site-header{height:62px;padding:0 18px;background:linear-gradient(rgba(3,6,9,.82),transparent);mix-blend-mode:normal}.wordmark b{font-size:8px}
   .product-index.compact{top:auto;left:0;right:0;bottom:0;width:100%;display:block;padding:10px 14px 12px;background:rgba(5,8,12,.94);border-top:1px solid var(--line);backdrop-filter:blur(10px)}
   .product-index.compact .index-label{display:none}.product-index.compact .index-links{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px 5px}.product-index.compact .index-links a{min-width:0;display:grid;gap:3px;font-size:6px;text-align:center}.product-index.compact .index-links a span{font-size:5px}.product-index.compact .index-links a:hover,.product-index.compact .index-links a:focus-visible{transform:none}
-  .title-card-copy{width:calc(100% - 36px)}.title-card-plaque{padding:clamp(24px,7vw,40px) clamp(16px,5vw,28px) clamp(28px,8vw,44px);border-radius:18px}.title-card-copy h1{font-size:clamp(48px,16vw,92px);letter-spacing:.04em}.title-card-copy p{font-size:16px}.title-card-enter{letter-spacing:.26em}
+  .title-card-copy{width:calc(100% - 36px)}.title-card-copy h1{font-size:clamp(48px,16vw,92px);letter-spacing:.04em}.title-card-copy p{font-size:16px}.title-card-enter{letter-spacing:.26em}
   .frontier{min-height:0;overflow:hidden}.hero-copy{position:relative;top:auto;left:auto;min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:110px 24px 120px;transform:none}.hero-copy h1{font-size:clamp(62px,19vw,105px)}.hero-copy>p{font-size:18px}.sky-plane{height:100svh}.moon{top:14%;right:15%}
   .hero-atmosphere{inset:-2%;bottom:auto;height:104svh;transform:none}.hero-atmosphere::before{background:linear-gradient(90deg,rgba(3,6,10,.82),rgba(5,9,14,.42)),linear-gradient(180deg,rgba(3,6,10,.25),transparent 38%,rgba(3,6,9,.72) 100%)}.hero-atmosphere img{object-position:center 45%;filter:saturate(.68) contrast(1.08) brightness(.72)}.basin-light{height:62vh;bottom:auto}
   .ridge-far{opacity:.16}.ridge-mid{opacity:.25}
@@ -724,5 +742,6 @@ html.entered .title-card {
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
   .landscape,.moon,.contour-plane,.ridge{transform:none!important}
   .hero-atmosphere,.hero-atmosphere img{transform:none!important}
+  .title-card-plate{animation:none;transform:none}
   .title-card{display:none}
 }
