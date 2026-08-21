@@ -148,7 +148,7 @@ test("ships all eight truthful product destinations and accessibility fallbacks"
   assert.doesNotMatch(css, /\.title-card-copy[^{]*\{[^}]*background:\s*var\(--title-navy\)/);
   assert.match(css, /@keyframes titleKenBurns\{[^}]*transform:/);
   assert.match(css, /\.title-card-plate\s*\{[^}]*animation:[^}]*titleKenBurns 16s/);
-  assert.match(css, /\.title-card-copy h1\{[^}]*text-shadow:/);
+  assert.match(css, /\.title-card-copy h1\s*\{[^}]*text-shadow:/);
   assert.match(css, /titleRise 1\.45s \.6s/);
   assert.match(css, /html\.entered \.title-card/);
   assert.match(css, /\.title-card\.is-yielding/);
