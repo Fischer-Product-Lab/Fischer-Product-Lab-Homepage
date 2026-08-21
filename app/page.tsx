@@ -235,8 +235,8 @@ function SectionMark({ number, children }: { number: string; children: React.Rea
   return <p className="section-mark"><span>{number}</span>{children}</p>;
 }
 
-const TITLE_HOLD_MS = 3200;
 const TITLE_YIELD_MS = 720;
+const TITLE_ENTER_KEYS = new Set([" ", "Enter", "Escape"]);
 
 export default function Home() {
   const [entered, setEntered] = useState(true);
@@ -279,15 +279,13 @@ export default function Home() {
 
     const onKey = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
+      if (!TITLE_ENTER_KEYS.has(event.key)) return;
+      event.preventDefault();
       enterLandscape();
     };
 
-    const auto = window.setTimeout(enterLandscape, TITLE_HOLD_MS);
     window.addEventListener("keydown", onKey);
-    return () => {
-      window.clearTimeout(auto);
-      window.removeEventListener("keydown", onKey);
-    };
+    return () => window.removeEventListener("keydown", onKey);
   }, [ready, entered, enterLandscape]);
 
   function navigate(event: React.MouseEvent<HTMLAnchorElement>, product: Product) {
@@ -322,11 +320,20 @@ export default function Home() {
           ref={titleCardRef}
           className={`title-card${yielding ? " is-yielding" : ""}`}
           aria-labelledby="title-card-wordmark"
-          aria-describedby="title-card-line"
+          aria-describedby="title-card-line title-card-enter"
           tabIndex={-1}
           onClick={enterLandscape}
         >
           <div className="title-card-void" aria-hidden="true">
+            <img
+              className="title-card-plate"
+              src="/title-card.webp"
+              alt=""
+              width={1600}
+              height={1066}
+              decoding="async"
+              fetchPriority="high"
+            />
             <span className="title-card-grain" />
             <i className="title-card-light" />
           </div>
@@ -335,6 +342,7 @@ export default function Home() {
             <span className="title-card-rule" aria-hidden="true" />
             <p id="title-card-line">A laboratory for trust, security, and AI.</p>
           </div>
+          <p className="title-card-enter" id="title-card-enter">Click to enter</p>
         </section>
       )}
 
