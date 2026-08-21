@@ -141,7 +141,7 @@ test("ships all eight truthful product destinations and accessibility fallbacks"
   assert.match(css, /\.title-card-plate/);
   assert.match(css, /\.title-card-enter/);
   assert.match(css, /\.title-card-plaque/);
-  assert.match(css, /\.title-card-plaque\{[^}]*background: var\(--title-navy\)/);
+  assert.match(css, /\.title-card-plaque\s*\{[^}]*background:\s*var\(--title-navy\)/);
   assert.match(css, /html\.entered \.title-card/);
   assert.match(css, /\.title-card\.is-yielding/);
   assert.match(css, /clamp\(56px, 12\.8vw, 168px\)/);

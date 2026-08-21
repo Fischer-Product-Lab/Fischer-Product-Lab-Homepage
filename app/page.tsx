@@ -265,7 +265,6 @@ export default function Home() {
     if (!shouldSkipTitleCard()) return;
     document.documentElement.classList.add("entered");
     enteredRef.current = true;
-    setEntered(true);
   }, []);
 
   const enterLandscape = useCallback(() => {
@@ -282,7 +281,7 @@ export default function Home() {
   }, [reducedMotion]);
 
   useEffect(() => {
-    if (entered) return;
+    if (entered || enteredRef.current) return;
     titleCardRef.current?.focus();
 
     const onKey = (event: KeyboardEvent) => {
