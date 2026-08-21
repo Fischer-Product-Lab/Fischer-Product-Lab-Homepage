@@ -238,27 +238,34 @@ function SectionMark({ number, children }: { number: string; children: React.Rea
 const TITLE_YIELD_MS = 720;
 const TITLE_ENTER_KEYS = new Set([" ", "Enter", "Escape"]);
 
+function shouldSkipTitleCard() {
+  try {
+    return (
+      document.documentElement.classList.contains("entered") ||
+      window.sessionStorage.getItem("fpl-entered") === "true" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    );
+  } catch {
+    return false;
+  }
+}
+
 export default function Home() {
-  const [entered, setEntered] = useState(true);
+  const [entered, setEntered] = useState(false);
   const [yielding, setYielding] = useState(false);
-  const [ready, setReady] = useState(false);
   const [active, setActive] = useState<ProductId | null>(null);
   const [departing, setDeparting] = useState<ProductId | null>(null);
   const reducedMotion = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
   const titleCardRef = useRef<HTMLElement>(null);
-  const enteredRef = useRef(true);
+  const enteredRef = useRef(false);
   const yieldingRef = useRef(false);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      const seen = window.sessionStorage.getItem("fpl-entered") === "true";
-      const skip = seen || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      enteredRef.current = skip;
-      setEntered(skip);
-      setReady(true);
-    }, 0);
-    return () => window.clearTimeout(timer);
+    if (!shouldSkipTitleCard()) return;
+    document.documentElement.classList.add("entered");
+    enteredRef.current = true;
+    setEntered(true);
   }, []);
 
   const enterLandscape = useCallback(() => {
@@ -267,6 +274,7 @@ export default function Home() {
     window.sessionStorage.setItem("fpl-entered", "true");
     setYielding(true);
     window.setTimeout(() => {
+      document.documentElement.classList.add("entered");
       enteredRef.current = true;
       setEntered(true);
       heroRef.current?.focus();
@@ -274,7 +282,7 @@ export default function Home() {
   }, [reducedMotion]);
 
   useEffect(() => {
-    if (!ready || entered) return;
+    if (entered) return;
     titleCardRef.current?.focus();
 
     const onKey = (event: KeyboardEvent) => {
@@ -286,7 +294,7 @@ export default function Home() {
 
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [ready, entered, enterLandscape]);
+  }, [entered, enterLandscape]);
 
   function navigate(event: React.MouseEvent<HTMLAnchorElement>, product: Product) {
     if (reducedMotion || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
@@ -315,7 +323,7 @@ export default function Home() {
       </header>
       <ProductIndex compact />
 
-      {ready && !entered && (
+      {!entered && (
         <section
           ref={titleCardRef}
           className={`title-card${yielding ? " is-yielding" : ""}`}
@@ -338,9 +346,11 @@ export default function Home() {
             <i className="title-card-light" />
           </div>
           <div className="title-card-copy">
-            <h1 id="title-card-wordmark">Fischer Product Lab</h1>
-            <span className="title-card-rule" aria-hidden="true" />
-            <p id="title-card-line">A laboratory for trust, security, and AI.</p>
+            <div className="title-card-plaque">
+              <h1 id="title-card-wordmark">Fischer Product Lab</h1>
+              <span className="title-card-rule" aria-hidden="true" />
+              <p id="title-card-line">A laboratory for trust, security, and AI.</p>
+            </div>
           </div>
           <p className="title-card-enter" id="title-card-enter">Click to enter</p>
         </section>

@@ -36,9 +36,14 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+const TITLE_CARD_BOOT_SCRIPT = `(function(){try{if(sessionStorage.getItem("fpl-entered")==="true"||matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("entered")}catch(e){}})();`;
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: TITLE_CARD_BOOT_SCRIPT }} />
+      </head>
       <body>{children}</body>
     </html>
   );

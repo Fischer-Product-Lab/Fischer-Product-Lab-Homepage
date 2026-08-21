@@ -50,6 +50,28 @@ test("server-renders the complete Fischer Product Lab journey", async () => {
   assert.match(html, /\/apple-touch-icon\.png/);
 });
 
+test("title card wins first paint and keeps the wordmark off the gold beam", async () => {
+  const response = await render();
+  const html = await response.text();
+
+  assert.match(html, /class="title-card"/);
+  assert.match(html, /title-card-plaque/);
+  assert.match(html, /id="title-card-wordmark"/);
+  assert.match(html, /Click to enter/);
+  assert.match(html, /sessionStorage\.getItem\("fpl-entered"\)/);
+  assert.match(html, /classList\.add\("entered"\)/);
+  assert.match(html, /prefers-reduced-motion: reduce/);
+
+  const scriptIdx = html.search(/sessionStorage\.getItem\("fpl-entered"\)/);
+  const cardIdx = html.search(/class="title-card"/);
+  const landscapeIdx = html.search(/class="frontier"/);
+  assert.notEqual(scriptIdx, -1);
+  assert.notEqual(cardIdx, -1);
+  assert.notEqual(landscapeIdx, -1);
+  assert.ok(scriptIdx < cardIdx, "boot script must run before the title card markup");
+  assert.ok(cardIdx < landscapeIdx, "title card must precede the landscape in first HTML");
+});
+
 test("ships all eight truthful product destinations and accessibility fallbacks", async () => {
   const [page, layout, css, products] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
@@ -81,15 +103,22 @@ test("ships all eight truthful product destinations and accessibility fallbacks"
   assert.match(page, /sessionStorage/);
   assert.match(page, /prefers-reduced-motion/);
   assert.match(page, /title-card/);
+  assert.match(page, /title-card-plaque/);
   assert.match(page, /\/title-card\.webp/);
   assert.match(page, /keydown/);
   assert.match(page, /TITLE_ENTER_KEYS/);
   assert.match(page, /Escape/);
   assert.match(page, /Click to enter/);
   assert.match(page, /A laboratory for trust, security, and AI/);
+  assert.match(page, /useState\(false\)/);
+  assert.doesNotMatch(page, /useState\(true\)/);
+  assert.doesNotMatch(page, /ready && !entered/);
   assert.doesNotMatch(page, /TITLE_HOLD_MS/);
   assert.doesNotMatch(page, /Enter the landscape/);
   assert.doesNotMatch(page, /Skip introduction/);
+  assert.match(layout, /sessionStorage\.getItem\("fpl-entered"\)/);
+  assert.match(layout, /classList\.add\("entered"\)/);
+  assert.match(layout, /dangerouslySetInnerHTML/);
   assert.match(page, /aria-label="Product index"/);
   assert.match(page, /aria-label="Eight product landmarks"/);
   assert.match(page, /Eight questions\./);
@@ -111,8 +140,12 @@ test("ships all eight truthful product destinations and accessibility fallbacks"
   assert.match(css, /\.title-card-light/);
   assert.match(css, /\.title-card-plate/);
   assert.match(css, /\.title-card-enter/);
+  assert.match(css, /\.title-card-plaque/);
+  assert.match(css, /\.title-card-plaque\{[^}]*background: var\(--title-navy\)/);
+  assert.match(css, /html\.entered \.title-card/);
   assert.match(css, /\.title-card\.is-yielding/);
   assert.match(css, /clamp\(56px, 12\.8vw, 168px\)/);
+  assert.doesNotMatch(css, /text-shadow: 0 0 64px rgba\(11,18,32,\.55\)/);
   assert.match(css, /@media \(min-width:801px\)[\s\S]*?\.landscape\{z-index:9\}/);
   assert.match(css, /\.landmark-vulnboard \.annotation\{left:165%;bottom:72px\}/);
   assert.match(css, /\.landmark-portfoliohealth \.annotation\{left:220%\}/);
