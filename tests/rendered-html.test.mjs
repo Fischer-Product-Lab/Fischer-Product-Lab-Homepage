@@ -81,8 +81,13 @@ test("ships all eight truthful product destinations and accessibility fallbacks"
   assert.match(page, /sessionStorage/);
   assert.match(page, /prefers-reduced-motion/);
   assert.match(page, /title-card/);
+  assert.match(page, /\/title-card\.webp/);
   assert.match(page, /keydown/);
+  assert.match(page, /TITLE_ENTER_KEYS/);
+  assert.match(page, /Escape/);
+  assert.match(page, /Click to enter/);
   assert.match(page, /A laboratory for trust, security, and AI/);
+  assert.doesNotMatch(page, /TITLE_HOLD_MS/);
   assert.doesNotMatch(page, /Enter the landscape/);
   assert.doesNotMatch(page, /Skip introduction/);
   assert.match(page, /aria-label="Product index"/);
@@ -104,7 +109,10 @@ test("ships all eight truthful product destinations and accessibility fallbacks"
   assert.match(css, /--title-gold: #C4A35A/);
   assert.match(css, /\.title-card-grain/);
   assert.match(css, /\.title-card-light/);
+  assert.match(css, /\.title-card-plate/);
+  assert.match(css, /\.title-card-enter/);
   assert.match(css, /\.title-card\.is-yielding/);
+  assert.match(css, /clamp\(56px, 12\.8vw, 168px\)/);
   assert.match(css, /@media \(min-width:801px\)[\s\S]*?\.landscape\{z-index:9\}/);
   assert.match(css, /\.landmark-vulnboard \.annotation\{left:165%;bottom:72px\}/);
   assert.match(css, /\.landmark-portfoliohealth \.annotation\{left:220%\}/);
@@ -140,5 +148,6 @@ test("ships all eight truthful product destinations and accessibility fallbacks"
     access(new URL("public/icon-512.png", root)),
     access(new URL("public/landscape-hero.webp", root)),
     access(new URL("public/landscape-hero-mobile.webp", root)),
+    access(new URL("public/title-card.webp", root)),
   ]);
 });
