@@ -344,12 +344,11 @@ export default function Home() {
             <span className="title-card-grain" />
             <i className="title-card-light" />
           </div>
+          <div className="title-card-scrim" aria-hidden="true" />
           <div className="title-card-copy">
-            <div className="title-card-plaque">
-              <h1 id="title-card-wordmark">Fischer Product Lab</h1>
-              <span className="title-card-rule" aria-hidden="true" />
-              <p id="title-card-line">A laboratory for trust, security, and AI.</p>
-            </div>
+            <h1 id="title-card-wordmark">Fischer Product Lab</h1>
+            <span className="title-card-rule" aria-hidden="true" />
+            <p id="title-card-line">A laboratory for trust, security, and AI.</p>
           </div>
           <p className="title-card-enter" id="title-card-enter">Click to enter</p>
         </section>
