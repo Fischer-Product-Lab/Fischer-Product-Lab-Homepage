@@ -80,6 +80,11 @@ test("ships all eight truthful product destinations and accessibility fallbacks"
   assert.match(products, /as const/);
   assert.match(page, /sessionStorage/);
   assert.match(page, /prefers-reduced-motion/);
+  assert.match(page, /title-card/);
+  assert.match(page, /keydown/);
+  assert.match(page, /A laboratory for trust, security, and AI/);
+  assert.doesNotMatch(page, /Enter the landscape/);
+  assert.doesNotMatch(page, /Skip introduction/);
   assert.match(page, /aria-label="Product index"/);
   assert.match(page, /aria-label="Eight product landmarks"/);
   assert.match(page, /Eight questions\./);
@@ -94,8 +99,12 @@ test("ships all eight truthful product destinations and accessibility fallbacks"
   assert.match(layout, /\/favicon\.ico/);
   assert.match(layout, /\/apple-touch-icon\.png/);
   assert.match(css, /@media \(max-width:800px\)/);
-  assert.match(css, /--threshold-horizon: calc\(58% \+ clamp\(18px, 2\.5vh, 28px\)\)/);
-  assert.match(css, /top: var\(--threshold-horizon\)/);
+  assert.match(css, /--title-navy: #0B1220/);
+  assert.match(css, /--title-ivory: #F4EFE4/);
+  assert.match(css, /--title-gold: #C4A35A/);
+  assert.match(css, /\.title-card-grain/);
+  assert.match(css, /\.title-card-light/);
+  assert.match(css, /\.title-card\.is-yielding/);
   assert.match(css, /@media \(min-width:801px\)[\s\S]*?\.landscape\{z-index:9\}/);
   assert.match(css, /\.landmark-vulnboard \.annotation\{left:165%;bottom:72px\}/);
   assert.match(css, /\.landmark-portfoliohealth \.annotation\{left:220%\}/);

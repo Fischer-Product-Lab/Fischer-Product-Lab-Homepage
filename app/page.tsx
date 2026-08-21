@@ -235,28 +235,63 @@ function SectionMark({ number, children }: { number: string; children: React.Rea
   return <p className="section-mark"><span>{number}</span>{children}</p>;
 }
 
+const TITLE_HOLD_MS = 3200;
+const TITLE_YIELD_MS = 720;
+
 export default function Home() {
   const [entered, setEntered] = useState(true);
+  const [yielding, setYielding] = useState(false);
   const [ready, setReady] = useState(false);
   const [active, setActive] = useState<ProductId | null>(null);
   const [departing, setDeparting] = useState<ProductId | null>(null);
   const reducedMotion = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
+  const titleCardRef = useRef<HTMLElement>(null);
+  const enteredRef = useRef(true);
+  const yieldingRef = useRef(false);
+  const enterLandscapeRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
       const seen = window.sessionStorage.getItem("fpl-entered") === "true";
-      setEntered(seen || window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+      const skip = seen || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      enteredRef.current = skip;
+      setEntered(skip);
       setReady(true);
     }, 0);
     return () => window.clearTimeout(timer);
   }, []);
 
   function enterLandscape() {
+    if (enteredRef.current || yieldingRef.current) return;
+    yieldingRef.current = true;
     window.sessionStorage.setItem("fpl-entered", "true");
-    setEntered(true);
-    window.setTimeout(() => heroRef.current?.focus(), reducedMotion ? 0 : 500);
+    setYielding(true);
+    window.setTimeout(() => {
+      enteredRef.current = true;
+      setEntered(true);
+      heroRef.current?.focus();
+    }, reducedMotion ? 0 : TITLE_YIELD_MS);
   }
+
+  enterLandscapeRef.current = enterLandscape;
+
+  useEffect(() => {
+    if (!ready || entered) return;
+    titleCardRef.current?.focus();
+
+    const onKey = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      enterLandscapeRef.current();
+    };
+
+    const auto = window.setTimeout(() => enterLandscapeRef.current(), TITLE_HOLD_MS);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.clearTimeout(auto);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [ready, entered]);
 
   function navigate(event: React.MouseEvent<HTMLAnchorElement>, product: Product) {
     if (reducedMotion || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
@@ -276,7 +311,7 @@ export default function Home() {
 
   return (
     <main className={`${entered ? "has-entered" : "at-threshold"}${departing ? ` is-departing departing-${departing}` : ""}`}>
-      <a className="skip-link" href="#frontier">Skip to the landscape</a>
+      <a className="skip-link" href="#frontier" onClick={enterLandscape}>Skip to the landscape</a>
       <header className="site-header">
         <a className="wordmark" href="#frontier" aria-label="Fischer Product Lab home">
           <span>FPL</span><b>Fischer Product Lab</b>
@@ -286,16 +321,23 @@ export default function Home() {
       <ProductIndex compact />
 
       {ready && !entered && (
-        <section className="threshold" aria-labelledby="threshold-title">
-          <div className="threshold-sky"><span /><i /></div>
-          <div className="threshold-copy">
-            <p>Fischer Product Lab <span>FIELD ED. 01</span></p>
-            <h1 id="threshold-title">Many paths.<br />One laboratory.</h1>
-            <div className="threshold-rule"><i /></div>
-            <p className="threshold-intro">Independent products for clearer decisions, stronger trust, and better-operated systems.</p>
-            <button type="button" onClick={enterLandscape}>Enter the landscape <span aria-hidden="true">↓</span></button>
+        <section
+          ref={titleCardRef}
+          className={`title-card${yielding ? " is-yielding" : ""}`}
+          aria-labelledby="title-card-wordmark"
+          aria-describedby="title-card-line"
+          tabIndex={-1}
+          onClick={enterLandscape}
+        >
+          <div className="title-card-void" aria-hidden="true">
+            <span className="title-card-grain" />
+            <i className="title-card-light" />
           </div>
-          <button className="skip-intro" type="button" onClick={enterLandscape}>Skip introduction</button>
+          <div className="title-card-copy">
+            <h1 id="title-card-wordmark">Fischer Product Lab</h1>
+            <span className="title-card-rule" aria-hidden="true" />
+            <p id="title-card-line">A laboratory for trust, security, and AI.</p>
+          </div>
         </section>
       )}
 

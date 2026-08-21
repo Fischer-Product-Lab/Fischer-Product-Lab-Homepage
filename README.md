@@ -26,4 +26,4 @@ Use `npm run build` for the Sites production build, `npm run build:vercel` for t
 - Product screens: update the `metrics` map with verified live values or replace each `InterfaceFragment` with optimized local captures. Keep the fragments inside the monuments and provide meaningful alternative text if a capture conveys new information.
 - Future products: add the typed product entry, a `metrics` tuple, a monument treatment in `Monument`, and its corresponding accent/position rules in `app/globals.css`.
 
-The entrance is stored only for the current browser session. Reduced-motion visitors bypass it automatically and receive the complete static composition.
+The session opens with a short animated title card — navy, ivory, one gold light, and grain — then dissolves into the landscape. The card is stored only for the current browser tab. Click or any key dismisses it early. Reduced-motion visitors skip the card and receive the complete static composition.
