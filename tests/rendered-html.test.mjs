@@ -111,7 +111,7 @@ test("ships all eight truthful product destinations and accessibility fallbacks"
   assert.match(page, /TITLE_ENTER_KEYS/);
   assert.match(page, /Escape/);
   assert.match(page, /Click to enter/);
-  assert.match(page, /A laboratory for trust, security, and AI/);
+  assert.match(page, /A laboratory for independent AI products enabling clearer decisions, stronger trust, and better-operated systems\./);
   assert.match(page, /useState\(false\)/);
   assert.doesNotMatch(page, /useState\(true\)/);
   assert.doesNotMatch(page, /ready && !entered/);
