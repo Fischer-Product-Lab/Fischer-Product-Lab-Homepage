@@ -21,7 +21,7 @@ export const products = [
     tagline:
       "Translate vulnerability findings into business-owned risk, SLA pressure, and executive action.",
     status: "Live",
-    url: "https://vuln-board-fpl.vercel.app/dashboard",
+    url: "https://vuln-board-fpl.vercel.app/",
     githubUrl: "https://github.com/Fischer-Product-Lab/VulnBoard",
     landmark: "The Sentinel Pyramids",
     inspiration: "Abstracted pyramid complex",
