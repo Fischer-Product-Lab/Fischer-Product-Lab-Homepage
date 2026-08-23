@@ -83,7 +83,8 @@ test("ships all eight truthful product destinations and accessibility fallbacks"
 
   assert.match(products, /https:\/\/productpulse-fpl\.vercel\.app\//);
   assert.match(products, /https:\/\/github\.com\/Fischer-Product-Lab\/productpulse/);
-  assert.match(products, /https:\/\/vuln-board-fpl\.vercel\.app\/dashboard/);
+  assert.match(products, /https:\/\/vuln-board-fpl\.vercel\.app\/"/);
+  assert.doesNotMatch(products, /https:\/\/vuln-board-fpl\.vercel\.app\/dashboard/);
   assert.match(products, /https:\/\/github\.com\/Fischer-Product-Lab\/VulnBoard/);
   assert.match(products, /https:\/\/portfolio-health-fpl\.vercel\.app\//);
   assert.match(products, /https:\/\/github\.com\/Fischer-Product-Lab\/portfolio-health/);
